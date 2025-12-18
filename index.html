@@ -1,136 +1,257 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Plus, Receipt, Trash2, Speaker } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SmartStore Billing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .mic-active { animation: pulse 1s infinite; background: #ef4444 !important; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 
+                           70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 
+                           100% { transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-[#f8fafc] min-h-screen">
 
-const VoiceBilling = () => {
-  const [items, setItems] = useState([]);
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  
-  // Speech Recognition Setup
-  const recognitionRef = useRef(null);
-
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = false;
-
-      recognitionRef.current.onresult = (event) => {
-        const lastResult = event.results[event.results.length - 1][0].transcript;
-        processVoiceCommand(lastResult.toLowerCase());
-      };
-    }
-  }, []);
-
-  const processVoiceCommand = (text) => {
-    // Basic AI Parsing: "Add 2 Milk" or "Add Bread"
-    const regex = /add (\d+)?\s?(\w+)/i;
-    const match = text.match(regex);
-
-    if (match) {
-      const quantity = parseInt(match[1]) || 1;
-      const name = match[2];
-      const price = Math.floor(Math.random() * 100) + 10; // Mock price logic
-      
-      const newItem = { id: Date.now(), name, quantity, price };
-      setItems(prev => [...prev, newItem]);
-    }
-  };
-
-  const handleStartListening = () => {
-    setIsListening(true);
-    recognitionRef.current?.start();
-  };
-
-  const handleStopListening = () => {
-    setIsListening(false);
-    recognitionRef.current?.stop();
-  };
-
-  const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-  return (
-    <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-10">
-          <div>
-            <h1 className="text-3xl font-bold text-indigo-600">SmartBill AI</h1>
-            <p className="text-slate-500">Voice-enabled inventory management</p>
-          </div>
-          <button className="bg-white px-4 py-2 rounded-lg shadow-sm border flex items-center gap-2 hover:bg-slate-50 transition">
-            <Plus size={18} /> Add Item Manually
-          </button>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Main Controls */}
-          <div className="md:col-span-1 space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 text-center">
-              <p className="text-sm font-medium text-slate-400 mb-4 uppercase tracking-wider">Voice Control</p>
-              
-              <button 
-                onMouseDown={handleStartListening}
-                onMouseUp={handleStopListening}
-                onMouseLeave={handleStopListening}
-                className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
-                  isListening 
-                  ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] scale-110' 
-                  : 'bg-indigo-600 hover:bg-indigo-700 shadow-lg'
-                }`}
-              >
-                <Mic size={32} color="white" className={isListening ? 'animate-pulse' : ''} />
-              </button>
-              
-              <p className="mt-4 text-sm text-slate-600">
-                {isListening ? "Listening... (Say 'Add 2 Coffee')" : "Hold to Speak"}
-              </p>
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <div>
+                <h1 class="text-2xl font-black text-slate-800 tracking-tight">AI <span class="text-indigo-600">SMARTSTORE</span></h1>
+                <p class="text-slate-400 text-sm font-medium">Voice-Based Intelligent Billing</p>
             </div>
-
-            <button className="w-full bg-slate-900 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-slate-800 transition shadow-lg">
-              <Receipt size={20} /> Generate Final Bill
-            </button>
-          </div>
-
-          {/* Items Table */}
-          <div className="md:col-span-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50 border-b border-slate-100">
-                <tr>
-                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">Item</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">Qty</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">Price</th>
-                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {items.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" className="px-6 py-12 text-center text-slate-400 italic">No items added yet. Use voice to add items.</td>
-                  </tr>
-                ) : (
-                  items.map(item => (
-                    <tr key={item.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 font-medium capitalize">{item.name}</td>
-                      <td className="px-6 py-4">{item.quantity}</td>
-                      <td className="px-6 py-4">${item.price}</td>
-                      <td className="px-6 py-4 font-bold">${item.price * item.quantity}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-            
-            <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
-              <span className="text-lg opacity-80">Grand Total</span>
-              <span className="text-3xl font-bold">${total}</span>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <div class="text-right">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Status</p>
+                    <p id="status" class="text-sm font-bold text-green-500">READY TO SCAN</p>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
-  );
-};
 
-export default VoiceBilling;
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-slate-900 rounded-[2rem] p-8 text-center text-white shadow-2xl overflow-hidden relative">
+                    <div class="relative z-10">
+                        <button id="micBtn" class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center mx-auto mb-6 transition-all duration-300 hover:scale-105 active:scale-95">
+                            <i class="fa-solid fa-microphone text-3xl"></i>
+                        </button>
+                        <h3 id="instruction" class="text-lg font-bold">Hold to Speak</h3>
+                        <p class="text-slate-400 text-xs mt-2 italic">"Add 500g Apple" or "Add 2 Milk"</p>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full h-1 bg-indigo-500/20"></div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+                    <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-database text-indigo-500 text-xs"></i> Product Database
+                    </h2>
+                    <div class="space-y-3 mb-6">
+                        <input type="text" id="dbName" placeholder="Item Name (Apple, Rice...)" class="w-full px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <div class="flex gap-2">
+                            <input type="number" id="dbPrice" placeholder="Price/kg or pkt" class="w-2/3 px-4 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <button onclick="addToDB()" class="w-1/3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition">+</button>
+                        </div>
+                    </div>
+                    <div id="dbContainer" class="space-y-2 max-h-48 overflow-y-auto pr-2">
+                        </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[600px] flex flex-col">
+                    <div class="p-8 border-b border-slate-50 flex justify-between items-end">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Current Cart</h2>
+                            <p id="dateDisplay" class="text-xs text-slate-400 font-bold uppercase mt-1"></p>
+                        </div>
+                        <button onclick="clearAll()" class="text-xs font-bold text-red-400 hover:text-red-600 uppercase tracking-widest">Empty Cart</button>
+                    </div>
+
+                    <div class="flex-grow overflow-y-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50">
+                                    <th class="px-8 py-4">Product</th>
+                                    <th class="px-8 py-4">Qty / Unit</th>
+                                    <th class="px-8 py-4 text-right">Subtotal</th>
+                                    <th class="px-8 py-4"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="billBody" class="divide-y divide-slate-50">
+                                </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-8 bg-slate-50 border-t border-slate-100 mt-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-slate-500 font-bold">Total Payable</span>
+                            <span class="text-4xl font-black text-slate-900">$<span id="grandTotal">0.00</span></span>
+                        </div>
+                        <button onclick="window.print()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-check-double"></i> CHECKOUT & PRINT
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = JSON.parse(localStorage.getItem('smartDB')) || { "apple": 10, "milk": 2, "rice": 5 };
+        let cart = [];
+
+        const micBtn = document.getElementById('micBtn');
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        const synth = window.speechSynthesis;
+
+        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        // --- Core Logic ---
+
+        function addToDB() {
+            const name = document.getElementById('dbName').value.toLowerCase().trim();
+            const price = parseFloat(document.getElementById('dbPrice').value);
+            if(name && price) {
+                db[name] = price;
+                localStorage.setItem('smartDB', JSON.stringify(db));
+                renderDB();
+                document.getElementById('dbName').value = '';
+                document.getElementById('dbPrice').value = '';
+            }
+        }
+
+        function renderDB() {
+            const container = document.getElementById('dbContainer');
+            container.innerHTML = '';
+            Object.keys(db).forEach(name => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 group">
+                        <span class="text-sm font-bold text-slate-700 capitalize">${name}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-black text-indigo-500">$${db[name]}</span>
+                            <button onclick="deleteFromDB('${name}')" class="text-slate-300 hover:text-red-500 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteFromDB(name) {
+            delete db[name];
+            localStorage.setItem('smartDB', JSON.stringify(db));
+            renderDB();
+        }
+
+        // --- Smart AI Voice Parsing ---
+
+        micBtn.onmousedown = () => {
+            micBtn.classList.add('mic-active');
+            document.getElementById('instruction').innerText = "System Listening...";
+            recognition.start();
+        };
+
+        micBtn.onmouseup = () => {
+            micBtn.classList.remove('mic-active');
+            document.getElementById('instruction').innerText = "Processing...";
+            recognition.stop();
+        };
+
+        recognition.onresult = (event) => {
+            const text = event.results[0][0].transcript.toLowerCase();
+            parseCommand(text);
+        };
+
+        function parseCommand(text) {
+            // Smart Regex: Detects (Add) (Number) (Unit: optional) (Item Name)
+            // Works for: "Add 2kg Apple", "Add 500g Rice", "Add 2 Milk"
+            const regex = /add\s+(\d+(?:\.\d+)?)\s*(kg|gram|g|pkt|pc|unit)?\s*(\w+)/i;
+            const match = text.match(regex);
+
+            if (match) {
+                let qty = parseFloat(match[1]);
+                let unit = match[2] || 'unit';
+                let name = match[3];
+
+                // Standardizing weights
+                let calcQty = qty;
+                if(unit === 'gram' || unit === 'g') {
+                    calcQty = qty / 1000; // Convert to base unit (kg) for price calc
+                    unit = 'g';
+                }
+
+                if (db[name]) {
+                    const price = db[name];
+                    const finalPrice = calcQty * price;
+                    
+                    cart.push({ 
+                        id: Date.now(), 
+                        name, 
+                        displayQty: `${qty}${unit}`, 
+                        totalPrice: finalPrice 
+                    });
+                    
+                    updateCartUI();
+                    speak(`Added ${qty} ${unit} of ${name}`);
+                } else {
+                    speak(`Item ${name} not in database`);
+                }
+            } else {
+                speak("I didn't catch that. Please say Add, followed by quantity and name.");
+            }
+            document.getElementById('instruction').innerText = "Hold to Speak";
+        }
+
+        function updateCartUI() {
+            const body = document.getElementById('billBody');
+            body.innerHTML = '';
+            let grandTotal = 0;
+
+            cart.forEach(item => {
+                grandTotal += item.totalPrice;
+                body.innerHTML += `
+                    <tr class="group hover:bg-indigo-50/30 transition-colors">
+                        <td class="px-8 py-5">
+                            <p class="font-bold text-slate-800 capitalize">${item.name}</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Inventory Item</p>
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="bg-white border border-slate-200 px-3 py-1 rounded-lg font-bold text-slate-600 text-sm">${item.displayQty}</span>
+                        </td>
+                        <td class="px-8 py-5 text-right font-black text-slate-900">$${item.totalPrice.toFixed(2)}</td>
+                        <td class="px-8 py-5 text-right">
+                            <button onclick="removeFromCart(${item.id})" class="text-slate-300 hover:text-red-500 transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartUI();
+        }
+
+        function clearAll() {
+            cart = [];
+            updateCartUI();
+        }
+
+        function speak(msg) {
+            const utterance = new SpeechSynthesisUtterance(msg);
+            utterance.pitch = 1;
+            utterance.rate = 1.1;
+            synth.speak(utterance);
+        }
+
+        renderDB();
+    </script>
+</body>
+</html>
