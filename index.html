@@ -66,16 +66,20 @@ function startVoice(){
   rec.lang = 'en-US';
   rec.start();
   rec.onresult = (event) => {
-  let lastIndex = event.results.length - 1;
-  let result = event.results[lastIndex];
-  if (!result.isFinal) return; // ignore interim results
+  for (let i = event.resultIndex; i < event.results.length; i++) {
+    const result = event.results[i];
+    if (!result.isFinal) continue; // skip interim
 
-  let text = result[0].transcript.toLowerCase().trim();
-  if(text === lastCommand) return; // prevent duplicate add
-  lastCommand = text;
+    const text = result[0].transcript.toLowerCase().trim();
 
-  parseVoice(text);
-  rec.stop();
+    if (text === lastCommand) return; // avoid duplicate
+    lastCommand = text;
+
+    console.log('Final voice:', text);
+    parseVoice(text);
+    rec.stop();
+    break;
+  }
 };
 }
 
