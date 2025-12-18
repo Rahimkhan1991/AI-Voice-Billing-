@@ -58,29 +58,54 @@ function addProduct(){
   pname.value = pprice.value = '';
 }
 
-function startVoice(){
-  if(!('webkitSpeechRecognition' in window)){
-    alert('Voice not supported'); return;
+function startVoice() {
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice recognition not supported on this browser");
+    return;
   }
-  let rec = new webkitSpeechRecognition();
-  rec.lang = 'en-US';
-  rec.start();
-  rec.onresult = (event) => {
-  for (let i = event.resultIndex; i < event.results.length; i++) {
-    const result = event.results[i];
-    if (!result.isFinal) continue; // skip interim
 
-    const text = result[0].transcript.toLowerCase().trim();
+  recognition = new SpeechRecognition();
 
-    if (text === lastCommand) return; // avoid duplicate
-    lastCommand = text;
+  recognition.lang = "en-US";
+  recognition.continuous = false;      // one command at a time
+  recognition.interimResults = true;   // REQUIRED on mobile
 
-    console.log('Final voice:', text);
-    parseVoice(text);
-    rec.stop();
-    break;
-  }
-};
+  recognition.onstart = () => {
+    console.log("🎤 Voice recognition started");
+  };
+
+  recognition.onerror = (event) => {
+    console.error("❌ Voice error:", event.error);
+    alert("Mic error: " + event.error);
+  };
+
+  recognition.onend = () => {
+    console.log("🛑 Voice recognition ended");
+  };
+
+  recognition.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const result = event.results[i];
+
+      if (!result.isFinal) continue;
+
+      const text = result[0].transcript.toLowerCase().trim();
+      console.log("✅ Final voice:", text);
+
+      if (text === lastCommand) return;
+      lastCommand = text;
+
+      parseVoice(text);
+      recognition.stop();
+      break;
+    }
+  };
+
+  recognition.start();
 }
 
 function parseVoice(text){
