@@ -65,7 +65,18 @@ function startVoice(){
   let rec = new webkitSpeechRecognition();
   rec.lang = 'en-US';
   rec.start();
-  rec.onresult = e => parseVoice(e.results[0][0].transcript.toLowerCase());
+  rec.onresult = (event) => {
+  let lastIndex = event.results.length - 1;
+  let result = event.results[lastIndex];
+  if (!result.isFinal) return; // ignore interim results
+
+  let text = result[0].transcript.toLowerCase().trim();
+  if(text === lastCommand) return; // prevent duplicate add
+  lastCommand = text;
+
+  parseVoice(text);
+  rec.stop();
+};
 }
 
 function parseVoice(text){
