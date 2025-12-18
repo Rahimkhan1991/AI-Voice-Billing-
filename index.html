@@ -1,132 +1,136 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voice Billing – Product List Based</title>
-  <style>
-    body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
-    .container { max-width:1000px; margin:auto; background:#fff; padding:20px; border-radius:8px; }
-    h1 { text-align:center; }
-    table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th, td { border:1px solid #ddd; padding:8px; text-align:center; }
-    th { background:#f0f0f0; }
-    input, button { padding:8px; font-size:15px; }
-    button { cursor:pointer; }
-    .row { display:flex; gap:10px; margin-bottom:10px; }
-    .voice { background:#2196f3; color:#fff; border:none; border-radius:4px; }
-    .add { background:#4caf50; color:#fff; border:none; border-radius:4px; }
-  </style>
-</head>
-<body>
-<div class="container">
-  <h1>🧾 Voice Billing (Product Master)</h1>
+import React, { useState, useRef, useEffect } from 'react';
+import { Mic, Plus, Receipt, Trash2, Speaker } from 'lucide-react';
 
-  <h3>➕ Add Product (One Time)</h3>
-  <div class="row">
-    <input id="pname" placeholder="Product name (apple)" />
-    <input id="pprice" type="number" placeholder="Price per KG" />
-    <button class="add" onclick="addProduct()">Save Product</button>
-  </div>
+const VoiceBilling = () => {
+  const [items, setItems] = useState([]);
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  
+  // Speech Recognition Setup
+  const recognitionRef = useRef(null);
 
-  <table>
-    <thead><tr><th>Product</th><th>Price / KG</th></tr></thead>
-    <tbody id="productList"></tbody>
-  </table>
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = false;
 
-  <h3>🎤 Billing</h3>
-  <button class="voice" onclick="startVoice()">Start Voice Billing</button>
+      recognitionRef.current.onresult = (event) => {
+        const lastResult = event.results[event.results.length - 1][0].transcript;
+        processVoiceCommand(lastResult.toLowerCase());
+      };
+    }
+  }, []);
 
-  <table>
-    <thead><tr><th>Item</th><th>Qty (KG)</th><th>Price</th></tr></thead>
-    <tbody id="bill"></tbody>
-  </table>
+  const processVoiceCommand = (text) => {
+    // Basic AI Parsing: "Add 2 Milk" or "Add Bread"
+    const regex = /add (\d+)?\s?(\w+)/i;
+    const match = text.match(regex);
 
-  <h2 style="text-align:right">Total: ₹ <span id="total">0</span></h2>
-</div>
-
-<script>
-let products = {};
-let total = 0;
-
-function addProduct(){
-  let name = pname.value.toLowerCase();
-  let price = parseFloat(pprice.value);
-  if(!name || !price) return;
-  products[name] = price;
-  productList.innerHTML += `<tr><td>${name}</td><td>${price}</td></tr>`;
-  pname.value = pprice.value = '';
-}
-
-function startVoice() {
-
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  if (!SpeechRecognition) {
-    alert("Voice recognition not supported on this browser");
-    return;
-  }
-
-  recognition = new SpeechRecognition();
-
-  recognition.lang = "en-US";
-  recognition.continuous = false;      // one command at a time
-  recognition.interimResults = true;   // REQUIRED on mobile
-
-  recognition.onstart = () => {
-    console.log("🎤 Voice recognition started");
-  };
-
-  recognition.onerror = (event) => {
-    console.error("❌ Voice error:", event.error);
-    alert("Mic error: " + event.error);
-  };
-
-  recognition.onend = () => {
-    console.log("🛑 Voice recognition ended");
-  };
-
-  recognition.onresult = (event) => {
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const result = event.results[i];
-
-      if (!result.isFinal) continue;
-
-      const text = result[0].transcript.toLowerCase().trim();
-      console.log("✅ Final voice:", text);
-
-      if (text === lastCommand) return;
-      lastCommand = text;
-
-      parseVoice(text);
-      recognition.stop();
-      break;
+    if (match) {
+      const quantity = parseInt(match[1]) || 1;
+      const name = match[2];
+      const price = Math.floor(Math.random() * 100) + 10; // Mock price logic
+      
+      const newItem = { id: Date.now(), name, quantity, price };
+      setItems(prev => [...prev, newItem]);
     }
   };
 
-  recognition.start();
-}
+  const handleStartListening = () => {
+    setIsListening(true);
+    recognitionRef.current?.start();
+  };
 
-function parseVoice(text){
-  // examples:
-  // "half kg apple"
-  // "500 gram apple"
-  // "1 kg apple"
+  const handleStopListening = () => {
+    setIsListening(false);
+    recognitionRef.current?.stop();
+  };
 
-  let qty = 1;
-  if(text.includes('half')) qty = 0.5;
-  if(text.includes('500')) qty = 0.5;
-  if(text.includes('250')) qty = 0.25;
+  const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  let product = Object.keys(products).find(p => text.includes(p));
-  if(!product){ alert('Product not found'); return; }
+  return (
+    <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <header className="flex justify-between items-center mb-10">
+          <div>
+            <h1 className="text-3xl font-bold text-indigo-600">SmartBill AI</h1>
+            <p className="text-slate-500">Voice-enabled inventory management</p>
+          </div>
+          <button className="bg-white px-4 py-2 rounded-lg shadow-sm border flex items-center gap-2 hover:bg-slate-50 transition">
+            <Plus size={18} /> Add Item Manually
+          </button>
+        </header>
 
-  let price = products[product] * qty;
-  total += price;
-  document.getElementById('total').innerText = total.toFixed(2);
-  bill.innerHTML += `<tr><td>${product}</td><td>${qty}</td><td>${price.toFixed(2)}</td></tr>`;
-}
-</script>
-</body>
-</html>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Main Controls */}
+          <div className="md:col-span-1 space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 text-center">
+              <p className="text-sm font-medium text-slate-400 mb-4 uppercase tracking-wider">Voice Control</p>
+              
+              <button 
+                onMouseDown={handleStartListening}
+                onMouseUp={handleStopListening}
+                onMouseLeave={handleStopListening}
+                className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  isListening 
+                  ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)] scale-110' 
+                  : 'bg-indigo-600 hover:bg-indigo-700 shadow-lg'
+                }`}
+              >
+                <Mic size={32} color="white" className={isListening ? 'animate-pulse' : ''} />
+              </button>
+              
+              <p className="mt-4 text-sm text-slate-600">
+                {isListening ? "Listening... (Say 'Add 2 Coffee')" : "Hold to Speak"}
+              </p>
+            </div>
+
+            <button className="w-full bg-slate-900 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-slate-800 transition shadow-lg">
+              <Receipt size={20} /> Generate Final Bill
+            </button>
+          </div>
+
+          {/* Items Table */}
+          <div className="md:col-span-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+            <table className="w-full text-left">
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">Item</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">Qty</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">Price</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {items.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-12 text-center text-slate-400 italic">No items added yet. Use voice to add items.</td>
+                  </tr>
+                ) : (
+                  items.map(item => (
+                    <tr key={item.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 font-medium capitalize">{item.name}</td>
+                      <td className="px-6 py-4">{item.quantity}</td>
+                      <td className="px-6 py-4">${item.price}</td>
+                      <td className="px-6 py-4 font-bold">${item.price * item.quantity}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            
+            <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
+              <span className="text-lg opacity-80">Grand Total</span>
+              <span className="text-3xl font-bold">${total}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default VoiceBilling;
