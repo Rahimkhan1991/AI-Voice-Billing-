@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Billing – Product List Based</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px; }
+    .container { max-width:1000px; margin:auto; background:#fff; padding:20px; border-radius:8px; }
+    h1 { text-align:center; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+    th { background:#f0f0f0; }
+    input, button { padding:8px; font-size:15px; }
+    button { cursor:pointer; }
+    .row { display:flex; gap:10px; margin-bottom:10px; }
+    .voice { background:#2196f3; color:#fff; border:none; border-radius:4px; }
+    .add { background:#4caf50; color:#fff; border:none; border-radius:4px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🧾 Voice Billing (Product Master)</h1>
+
+  <h3>➕ Add Product (One Time)</h3>
+  <div class="row">
+    <input id="pname" placeholder="Product name (apple)" />
+    <input id="pprice" type="number" placeholder="Price per KG" />
+    <button class="add" onclick="addProduct()">Save Product</button>
+  </div>
+
+  <table>
+    <thead><tr><th>Product</th><th>Price / KG</th></tr></thead>
+    <tbody id="productList"></tbody>
+  </table>
+
+  <h3>🎤 Billing</h3>
+  <button class="voice" onclick="startVoice()">Start Voice Billing</button>
+
+  <table>
+    <thead><tr><th>Item</th><th>Qty (KG)</th><th>Price</th></tr></thead>
+    <tbody id="bill"></tbody>
+  </table>
+
+  <h2 style="text-align:right">Total: ₹ <span id="total">0</span></h2>
+</div>
+
+<script>
+let products = {};
+let total = 0;
+
+function addProduct(){
+  let name = pname.value.toLowerCase();
+  let price = parseFloat(pprice.value);
+  if(!name || !price) return;
+  products[name] = price;
+  productList.innerHTML += `<tr><td>${name}</td><td>${price}</td></tr>`;
+  pname.value = pprice.value = '';
+}
+
+function startVoice(){
+  if(!('webkitSpeechRecognition' in window)){
+    alert('Voice not supported'); return;
+  }
+  let rec = new webkitSpeechRecognition();
+  rec.lang = 'en-US';
+  rec.start();
+  rec.onresult = e => parseVoice(e.results[0][0].transcript.toLowerCase());
+}
+
+function parseVoice(text){
+  // examples:
+  // "half kg apple"
+  // "500 gram apple"
+  // "1 kg apple"
+
+  let qty = 1;
+  if(text.includes('half')) qty = 0.5;
+  if(text.includes('500')) qty = 0.5;
+  if(text.includes('250')) qty = 0.25;
+
+  let product = Object.keys(products).find(p => text.includes(p));
+  if(!product){ alert('Product not found'); return; }
+
+  let price = products[product] * qty;
+  total += price;
+  document.getElementById('total').innerText = total.toFixed(2);
+  bill.innerHTML += `<tr><td>${product}</td><td>${qty}</td><td>${price.toFixed(2)}</td></tr>`;
+}
+</script>
+</body>
+</html>
