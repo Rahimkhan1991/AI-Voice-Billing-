@@ -133,39 +133,70 @@
             `).join('');
         }
 
-        function addToCart(id, qty) {
-            const product = inventory.find(p => p.id == id);
-            const exists = cart.find(c => c.id === id);
-            if(exists) exists.qty += qty; else cart.push({ ...product, qty });
-            
-            // Animation Trigger
-            const btn = document.getElementById('cartBtn');
-            btn.classList.add('cart-bounce');
-            setTimeout(() => btn.classList.remove('cart-bounce'), 400);
-            
-            updateCartUI();
-        }
+        // --- UPDATED ADD TO CART LOGIC ---
+function addToCart(id, qty = 1) {
+    const product = inventory.find(p => p.id == id);
+    if (!product) return;
 
-        function updateCartUI() {
-            const count = cart.reduce((acc, i) => acc + i.qty, 0);
-            const badge = document.getElementById('cartCount');
-            badge.innerText = count;
-            badge.classList.toggle('hidden', count === 0);
+    // FIX 1: Check if item requires exact weight/measurement input
+    if (product.askQty && typeof qty === 'number' && qty === 1) {
+        tempItem = product;
+        setupModalUnits(product.unit);
+        document.getElementById('modalItemName').innerText = product.name;
+        document.getElementById('modalStock').innerText = product.stock || 0;
+        document.getElementById('stockUnit').innerText = product.unit;
+        document.getElementById('primaryQty').value = 1;
+        convertUnits('primary');
+        document.getElementById('qtyModal').classList.replace('hidden', 'flex'); // Show measurement modal
+        return; // Stop here and wait for modal confirmation
+    }
 
-            const total = cart.reduce((acc, i) => acc + (i.qty * i.price), 0);
-            document.getElementById('cartTotal').innerText = formatMoney(total);
-            document.getElementById('fabTotal').innerText = formatMoney(total);
+    // FIX 2: Prevent separate entries for the same item in the list
+    const exists = cart.find(c => c.id === id);
+    if (exists) {
+        exists.qty += qty; 
+    } else {
+        cart.push({ ...product, qty });
+    }
+    
+    // Animation for the Cart Button
+    const btn = document.getElementById('cartBtn');
+    if(btn) {
+        btn.classList.add('cart-bounce');
+        setTimeout(() => btn.classList.remove('cart-bounce'), 400);
+    }
+    
+    updateCartUI();
+}
 
-            document.getElementById('cartItems').innerHTML = cart.map((item, idx) => `
-                <div class="bg-white/5 p-5 rounded-[2rem] flex justify-between items-center text-white border border-white/5">
-                    <div>
-                        <p class="font-bold text-sm capitalize">${item.name}</p>
-                        <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">${item.qty} ${item.unit} x ${formatMoney(item.price)}</p>
-                    </div>
-                    <button onclick="removeFromCart(${idx})" class="w-10 h-10 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">&times;</button>
-                </div>
-            `).join('');
-        }
+// --- UPDATED UI LOGIC ---
+function updateCartUI() {
+    // FIX 3: Badge shows Total Unique items (Rows), not total quantity
+    const uniqueItemCount = cart.length; 
+    const badge = document.getElementById('cartCount');
+    if(badge) {
+        badge.innerText = uniqueItemCount;
+        badge.classList.toggle('hidden', uniqueItemCount === 0);
+    }
+
+    // Grand Total calculation for the floating display and modal
+    const total = cart.reduce((acc, i) => acc + (i.qty * i.price), 0);
+    document.getElementById('cartTotal').innerText = formatMoney(total);
+    document.getElementById('fabTotal').innerText = formatMoney(total);
+
+    // Render list in the cart modal
+    document.getElementById('cartItems').innerHTML = cart.map((item, idx) => `
+        <div class="bg-white/5 p-5 rounded-[2rem] flex justify-between items-center text-white border border-white/5">
+            <div>
+                <p class="font-bold text-sm capitalize">${item.name}</p>
+                <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                    ${item.qty} ${item.unit} x ${formatMoney(item.price)}
+                </p>
+            </div>
+            <button onclick="removeFromCart(${idx})" class="w-10 h-10 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center">&times;</button>
+        </div>
+    `).join('');
+}
 
         function removeFromCart(idx) { cart.splice(idx, 1); updateCartUI(); }
         function toggleCartModal() {
