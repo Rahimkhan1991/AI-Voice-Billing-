@@ -12,7 +12,7 @@
         .custom-select-wrapper select { appearance: none; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
+<body class="min-h-screen flex flex-col items-center justify-center p-6 gap-6">
 
     <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-white">
         <div class="bg-slate-900 p-12 text-white flex flex-col justify-between relative">
@@ -105,15 +105,73 @@
         </div>
     </div>
 
+    <div class="max-w-5xl w-full p-8 bg-white/80 backdrop-blur-md rounded-[2.5rem] border border-white shadow-xl">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-center md:text-left">
+                <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-indigo-600"></i> Cloud Data Management
+                </h3>
+                <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">Export your data to JSON or Restore from a local backup file</p>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="backupSystemData()" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-black text-[10px] shadow-sm hover:bg-indigo-600 transition flex items-center gap-2 uppercase tracking-widest">
+                    <i class="fa-solid fa-download"></i> Backup
+                </button>
+                
+                <label class="bg-indigo-50 text-indigo-600 px-6 py-3 rounded-xl font-black text-[10px] border border-indigo-100 hover:bg-indigo-100 transition flex items-center gap-2 cursor-pointer uppercase tracking-widest">
+                    <i class="fa-solid fa-upload"></i> Restore
+                    <input type="file" id="restoreFile" class="hidden" accept=".json" onchange="restoreSystemData(event)">
+                </label>
+            </div>
+        </div>
+    </div>
+
     <script>
         function handleCurrencyChange(val) {
             const box = document.getElementById('customCurrencyBox');
             box.classList.toggle('hidden', val !== 'CUSTOM');
         }
 
+        // --- BACKUP LOGIC ---
+        function backupSystemData() {
+            const backup = {
+                biz: localStorage.getItem('AI_POS_BIZ_DATA'),
+                inventory: localStorage.getItem('AI_POS_INVENTORY'),
+                sales: localStorage.getItem('AI_POS_SALES'),
+                date: new Date().toISOString()
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `AIPOS_PRO_BACKUP_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // --- RESTORE LOGIC ---
+        function restoreSystemData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm("Restore this backup? Current data will be replaced.")) {
+                        if(data.biz) localStorage.setItem('AI_POS_BIZ_DATA', data.biz);
+                        if(data.inventory) localStorage.setItem('AI_POS_INVENTORY', data.inventory);
+                        if(data.sales) localStorage.setItem('AI_POS_SALES', data.sales);
+                        alert("Restored Successfully!");
+                        window.location.reload();
+                    }
+                } catch (err) { alert("Invalid backup file!"); }
+            };
+            reader.readAsText(file);
+        }
+
         document.getElementById('setupForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
             let locale, currencyCode, symbol;
             const selection = document.getElementById('bizCurrency').value;
 
@@ -123,9 +181,7 @@
                 currencyCode = 'CUSTOM';
             } else {
                 const parts = selection.split('|');
-                locale = parts[0];
-                currencyCode = parts[1];
-                symbol = parts[2];
+                locale = parts[0]; currencyCode = parts[1]; symbol = parts[2];
             }
 
             const bizData = {
@@ -141,13 +197,22 @@
             };
 
             localStorage.setItem('AI_POS_BIZ_DATA', JSON.stringify(bizData));
-            window.location.href = 'dashboard.html';
+            window.location.href = 'index.html'; // Changed to index.html as per common dash naming
         });
 
-        const existing = localStorage.getItem('AI_POS_BIZ_DATA');
-        if(existing && !window.location.search.includes('edit=true')) {
-            window.location.href = 'dashboard.html';
-        }
+        // Pre-fill on Edit Mode
+        window.onload = function() {
+            const existingData = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA'));
+            if (existingData && window.location.search.includes('edit=true')) {
+                document.getElementById('bizName').value = existingData.name;
+                document.getElementById('bizIndustry').value = existingData.industry;
+                document.getElementById('bizAddress').value = existingData.address;
+                document.getElementById('bizPhone').value = existingData.phone;
+                document.getElementById('bizTax').value = existingData.tax;
+            } else if (existingData) {
+                window.location.href = 'index.html';
+            }
+        };
     </script>
 </body>
 </html>
