@@ -197,7 +197,7 @@
             };
 
             localStorage.setItem('AI_POS_BIZ_DATA', JSON.stringify(bizData));
-            window.location.href = 'index.html'; // Changed to index.html as per common dash naming
+            window.location.href = 'dashboard.html'; // Changed to index.html as per common dash naming
         });
 
         // Pre-fill on Edit Mode
@@ -210,7 +210,7 @@
                 document.getElementById('bizPhone').value = existingData.phone;
                 document.getElementById('bizTax').value = existingData.tax;
             } else if (existingData) {
-                window.location.href = 'index.html';
+                window.location.href = 'dashboard.html';
             }
         };
     </script>
