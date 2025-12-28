@@ -131,10 +131,10 @@ function formatMoney(amount) {
                 return `
                     <div class="bg-white p-3 rounded-2xl border flex items-center justify-between">
                         <div><p class="font-bold text-xs capitalize">${item.name}</p><p class="text-[9px] font-bold text-slate-400">${item.qty} ${item.unit} x $${item.price}</p></div>
-                        <div class="flex items-center gap-3"><p class="font-black text-indigo-600 text-sm">$${sub.toFixed(2)}</p><button onclick="cart.splice(${idx},1); updateCart()" class="text-slate-300">×</button></div>
+                        <div class="flex items-center gap-3"><p class="font-black text-indigo-600 text-sm">${formatMoney(sub)}</p><button onclick="cart.splice(${idx},1); updateCart()" class="text-slate-300">×</button></div>
                     </div>`;
             }).join('');
-            document.getElementById('grandTotal').innerText = total.toFixed(2);
+            document.getElementById('grandTotal').innerText = formatMoney(total).replace(biz.symbol, "").trim();
         }
 
         // --- VOICE ENGINE ---
