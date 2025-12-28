@@ -50,10 +50,13 @@
                 <h1 class="text-3xl font-black text-slate-800 tracking-tight" id="welcomeMsg">Hello!</h1>
                 <p class="text-slate-500 font-medium italic" id="displayIndustry">Store Management</p>
             </div>
+            <button onclick="initDashboard()" class="p-3 bg-white border rounded-xl hover:bg-slate-50 text-indigo-600 shadow-sm">
+                <i class="fa-solid fa-rotate"></i>
+            </button>
         </header>
 
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 text-center md:text-left">
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-cash-register"></i></div>
                     <span class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md">LIVE</span>
@@ -62,7 +65,7 @@
                 <h2 id="statRevenue" class="text-2xl font-black text-slate-800">0</h2>
             </div>
 
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 text-center md:text-left">
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                     <span class="text-[10px] font-black text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md">NET</span>
@@ -71,7 +74,7 @@
                 <h2 id="statProfit" class="text-2xl font-black text-slate-800">0</h2>
             </div>
 
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 text-center md:text-left">
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-boxes-stacked"></i></div>
                 </div>
@@ -79,7 +82,7 @@
                 <h2 id="statItems" class="text-2xl font-black text-slate-800">0</h2>
             </div>
 
-            <div class="bg-slate-900 p-6 rounded-[2rem] shadow-xl text-white">
+            <div class="bg-slate-900 p-6 rounded-[2rem] shadow-xl text-white text-center md:text-left">
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-lg border border-white/20"><i class="fa-solid fa-wallet"></i></div>
                 </div>
@@ -106,13 +109,7 @@
     </main>
 
     <script>
-        // --- DATA RECOVERY ---
-        // Same keys as your Reports Page
-        const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { name: "Store", locale: "id-ID", symbol: "Rp", currencyCode: "IDR" };
-        const inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
-        const sales = JSON.parse(localStorage.getItem('AI_POS_SALES')) || [];
-
-        function formatMoney(amount) {
+        function formatMoney(amount, biz) {
             return new Intl.NumberFormat(biz.locale, {
                 style: 'currency',
                 currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
@@ -121,31 +118,37 @@
         }
 
         function initDashboard() {
+            // Re-fetch data every time function runs to ensure fresh state
+            const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { name: "Store", locale: "id-ID", symbol: "Rp", currencyCode: "IDR" };
+            const inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
+            const sales = JSON.parse(localStorage.getItem('AI_POS_SALES')) || [];
+
+            // UI Header
             document.getElementById('navBizName').innerText = biz.name;
             document.getElementById('welcomeMsg').innerText = `Hello, ${biz.name}!`;
             document.getElementById('displayIndustry').innerText = biz.industry || "General Retail";
 
-            // Revenue calculation
-            const revenue = sales.reduce((acc, tx) => acc + (parseFloat(tx.total) || 0), 0);
-            document.getElementById('statRevenue').innerText = formatMoney(revenue);
+            // 1. REVENUE (Calculated like Reports page)
+            const revenue = sales.reduce((acc, tx) => acc + (Number(tx.total) || 0), 0);
+            document.getElementById('statRevenue').innerText = formatMoney(revenue, biz);
 
-            // Profit calculation
-            const profit = sales.reduce((acc, tx) => acc + (parseFloat(tx.profit) || 0), 0);
-            document.getElementById('statProfit').innerText = formatMoney(profit);
+            // 2. PROFIT (Calculated like Reports page)
+            const profit = sales.reduce((acc, tx) => acc + (Number(tx.profit) || 0), 0);
+            document.getElementById('statProfit').innerText = formatMoney(profit, biz);
 
-            // Item count
+            // 3. STOCK COUNT
             document.getElementById('statItems').innerText = inventory.length;
 
-            // Asset Value calculation
+            // 4. ASSET VALUE (Inventory Value)
             const assetValue = inventory.reduce((acc, item) => {
-                const buyPrice = parseFloat(item.purchasePrice) || 0;
-                const qty = parseFloat(item.stock) || 0;
-                return acc + (buyPrice * qty);
+                const buyPrice = Number(item.purchasePrice) || 0;
+                const stockQty = Number(item.stock) || 0;
+                return acc + (buyPrice * stockQty);
             }, 0);
-            document.getElementById('statValue').innerText = formatMoney(assetValue);
+            document.getElementById('statValue').innerText = formatMoney(assetValue, biz);
 
-            // Low Stock alerts
-            const lowStock = inventory.filter(p => p.stock < 5);
+            // 5. LOW STOCK ALERTS
+            const lowStock = inventory.filter(p => Number(p.stock) < 5);
             const alertBox = document.getElementById('lowStockAlert');
             if(lowStock.length > 0) {
                 alertBox.innerHTML = lowStock.map(p => `
@@ -159,7 +162,8 @@
             }
         }
 
-        initDashboard();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>
 </html>
