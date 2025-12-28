@@ -141,12 +141,12 @@
             };
 
             localStorage.setItem('AI_POS_BIZ_DATA', JSON.stringify(bizData));
-            window.location.href = 'index.html';
+            window.location.href = 'dashboard.html';
         });
 
         const existing = localStorage.getItem('AI_POS_BIZ_DATA');
         if(existing && !window.location.search.includes('edit=true')) {
-            window.location.href = 'index.html';
+            window.location.href = 'dashboard.html';
         }
     </script>
 </body>
