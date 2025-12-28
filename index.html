@@ -139,29 +139,71 @@
         }
 
         // --- CORE LOGIC ---
-        function processVoice(text) {
-            // Regex for: Add [qty] [unit] [item]
-            const regex = /add\s+(\d+(?:\.\d+)?)\s*(kg|gram|g|pkt|pc|unit)?\s*(\w+)/i;
-            const match = text.match(regex);
+        function parseVoice(text) {
+    // 1. Split the sentence into individual item commands (e.g., by "and" or ",")
+    const parts = text.split(/and|,|\+/);
 
-            if (match) {
-                let qty = parseFloat(match[1]);
-                let unit = match[2] || 'unit';
-                let name = match[3];
+    parts.forEach(part => {
+        const cleanPart = part.trim();
+        
+        // 2. Enhanced Regex to capture Qty, Unit, and Item Name
+        // Handles: "2.5kg", "half kg", "500g", "2 units"
+        const regex = /(\d+(?:\/\d+|\.\d+)?|half|quarter)\s*(kg|kilo|gram|g|pkt|pc|unit|bottle)?\s*(\w+)/i;
+        const match = cleanPart.match(regex);
 
-                let calcQty = (unit === 'gram' || unit === 'g') ? qty / 1000 : qty;
+        if (match) {
+            let rawQty = match[1].toLowerCase();
+            let unit = match[2] || 'unit';
+            let itemName = match[3].toLowerCase();
+
+            // Handle Word-based Quantities
+            let qty = 0;
+            if (rawQty === 'half') qty = 0.5;
+            else if (rawQty === 'quarter') qty = 0.25;
+            else qty = eval(rawQty); // Converts "1/4" to 0.25
+
+            // Standardize Units for pricing (Price is per KG or per Unit)
+            let calcQty = qty;
+            if (unit === 'gram' || unit === 'g') {
+                calcQty = qty / 1000; 
+                unit = 'g';
+            } else if (unit === 'kilo') {
+                unit = 'kg';
+            }
+
+            // 3. FUZZY FILTER: Find the best match in your Database
+            // This checks if the word you said is contained in a DB key or vice-versa
+            const dbKey = Object.keys(db).find(k => 
+                itemName.includes(k) || k.includes(itemName)
+            );
+
+            if (dbKey) {
+                const price = db[dbKey];
+                const rowTotal = calcQty * price;
                 
-                if (db[name]) {
-                    const price = db[name];
-                    const finalPrice = calcQty * price;
-                    cart.push({ id: Date.now(), name, displayQty: `${qty}${unit}`, total: finalPrice });
-                    updateUI();
-                    speak(`Added ${qty} ${unit} of ${name}`);
-                } else {
-                    speak(`Sorry, ${name} is not in your database`);
-                }
+                cart.push({ 
+                    id: Date.now() + Math.random(), 
+                    name: dbKey, 
+                    displayQty: rawQty + (unit !== 'unit' ? unit : ''), 
+                    total: rowTotal, 
+                    unitPrice: price 
+                });
+                
+                updateCartUI();
+                console.log(`Successfully added: ${dbKey}`);
+            } else {
+                console.log(`Could not find item: ${itemName}`);
             }
         }
+    });
+
+    // 4. Voice Confirmation
+    if (cart.length > 0) {
+        speak("Items processed and added to cart.");
+    } else {
+        speak("I couldn't identify those items. Please try again.");
+    }
+}
 
         function updateUI() {
             const body = document.getElementById('billBody');
