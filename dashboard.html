@@ -16,7 +16,7 @@
 
     <nav class="bg-slate-900 text-white p-5 flex justify-between items-center shadow-xl shrink-0">
         <div class="flex items-center gap-3 font-black italic text-xl">
-            <i class="fa-solid fa-gauge-high text-indigo-500"></i> AI-POS PRO
+            <i class="fa-solid fa-gauge-high text-indigo-500"></i> <span id="navBizName">AI-POS PRO</span>
         </div>
         <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest">
             <a href="index.html" class="text-indigo-400">Dashboard</a>
@@ -29,8 +29,8 @@
         
         <section class="flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <h1 class="text-4xl font-black text-slate-800 tracking-tight">Welcome Back!</h1>
-                <p class="text-slate-500 font-medium">Here is what's happening with your store today.</p>
+                <h1 class="text-4xl font-black text-slate-800 tracking-tight" id="welcomeMsg">Welcome!</h1>
+                <p class="text-slate-500 font-medium">Your global business overview at a glance.</p>
             </div>
             <div class="flex gap-4">
                 <a href="billing.html" class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-indigo-200 hover:scale-105 transition flex items-center gap-3">
@@ -45,87 +45,97 @@
                     <i class="fa-solid fa-box-open"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Products</p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">In-Stock Items</p>
                     <h2 id="statItems" class="text-3xl font-black text-slate-800">0</h2>
                 </div>
             </div>
 
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-6">
                 <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl">
-                    <i class="fa-solid fa-layer-group"></i>
+                    <i class="fa-solid fa-wallet"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Categories</p>
-                    <h2 id="statCats" class="text-3xl font-black text-slate-800">0</h2>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inventory Value</p>
+                    <h2 id="statValue" class="text-3xl font-black text-slate-800">0</h2>
                 </div>
             </div>
 
             <div class="gradient-card p-8 rounded-[2.5rem] shadow-xl text-white flex items-center gap-6">
-                <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-2xl">
-                    <i class="fa-solid fa-bolt"></i>
+                <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-2xl border border-white/30">
+                    <i class="fa-solid fa-briefcase"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-black opacity-70 uppercase tracking-widest">System Status</p>
-                    <h2 class="text-2xl font-black uppercase italic">AI Online</h2>
+                    <p class="text-[10px] font-black opacity-70 uppercase tracking-widest">Industry Mode</p>
+                    <h2 id="statIndustry" class="text-xl font-black italic uppercase tracking-tighter">Retail</h2>
                 </div>
             </div>
         </section>
 
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <a href="billing.html" class="group bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-indigo-100 transition-all">
-                <div class="flex justify-between items-start mb-10">
-                    <div class="bg-indigo-600 w-16 h-16 rounded-2xl text-white flex items-center justify-center text-2xl shadow-lg">
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
+            <a href="billing.html" class="group bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden relative">
+                <div class="relative z-10">
+                    <div class="bg-indigo-600 w-14 h-14 rounded-2xl text-white flex items-center justify-center text-xl shadow-lg mb-8">
                         <i class="fa-solid fa-microphone"></i>
                     </div>
-                    <i class="fa-solid fa-arrow-right text-slate-200 group-hover:text-indigo-600 group-hover:translate-x-2 transition-all"></i>
+                    <h3 class="text-2xl font-black text-slate-800 mb-2">Voice & Hybrid Billing</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Start selling using AI voice commands or manual selection.</p>
                 </div>
-                <h3 class="text-2xl font-black text-slate-800 mb-2">Open Billing POS</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">Start a new transaction using voice commands or manual selection. Optimized for high-speed sales.</p>
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-50 rounded-full opacity-50 group-hover:scale-150 transition-all"></div>
             </a>
 
-            <a href="inventory.html" class="group bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-emerald-100 transition-all">
-                <div class="flex justify-between items-start mb-10">
-                    <div class="bg-slate-900 w-16 h-16 rounded-2xl text-white flex items-center justify-center text-2xl shadow-lg">
-                        <i class="fa-solid fa-sliders"></i>
+            <a href="inventory.html" class="group bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden relative">
+                <div class="relative z-10">
+                    <div class="bg-slate-900 w-14 h-14 rounded-2xl text-white flex items-center justify-center text-xl shadow-lg mb-8">
+                        <i class="fa-solid fa-boxes-packing"></i>
                     </div>
-                    <i class="fa-solid fa-arrow-right text-slate-200 group-hover:text-slate-900 group-hover:translate-x-2 transition-all"></i>
+                    <h3 class="text-2xl font-black text-slate-800 mb-2">Stock Control</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Manage your products, prices, and measurement units.</p>
                 </div>
-                <h3 class="text-2xl font-black text-slate-800 mb-2">Manage Stock</h3>
-                <p class="text-slate-500 text-sm leading-relaxed">Add new products, update prices, and organize your categories. Control your store's inventory here.</p>
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-slate-100 rounded-full opacity-50 group-hover:scale-150 transition-all"></div>
             </a>
         </section>
-
     </main>
 
     <script>
-        // 1. Load the business data from the Setup page
-const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { locale: 'en-US', symbol: '$', currencyCode: 'USD' };
+        // --- GLOBAL HELPER (PASTE THIS ON EVERY PAGE) ---
+        const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA'));
 
-/**
- * 2. The Universal Money Formatter
- * This handles the dots/commas and currency symbol placement automatically.
- */
-function formatMoney(amount) {
-    try {
-        return new Intl.NumberFormat(biz.locale, {
-            style: 'currency',
-            currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
-            maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
-        }).format(amount).replace('USD', biz.symbol); 
-    } catch (e) {
-        // Fallback if the locale/currency code is invalid
-        return biz.symbol + " " + parseFloat(amount).toFixed(2);
-    }
-}
-        // Load data from localStorage to show stats
-        const inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
-        
-        // Calculate Stats
-        document.getElementById('statItems').innerText = inventory.length;
-        
-        // Count unique categories
-        const uniqueCats = [...new Set(inventory.map(p => p.cat))];
-        document.getElementById('statCats').innerText = uniqueCats.length;
+        // Redirect to setup if no business data exists
+        if (!biz) {
+            window.location.href = 'setup.html';
+        }
+
+        function formatMoney(amount) {
+            try {
+                return new Intl.NumberFormat(biz.locale, {
+                    style: 'currency',
+                    currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
+                    maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
+                }).format(amount).replace('USD', biz.symbol); 
+            } catch (e) {
+                return biz.symbol + " " + parseFloat(amount).toLocaleString();
+            }
+        }
+
+        // --- DASHBOARD LOGIC ---
+        function initDashboard() {
+            // Update Branding
+            document.getElementById('navBizName').innerText = biz.name;
+            document.getElementById('welcomeMsg').innerText = `Welcome, ${biz.name}!`;
+            document.getElementById('statIndustry').innerText = biz.industry;
+
+            // Load Inventory Data
+            const inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
+            
+            // Calculate Count
+            document.getElementById('statItems').innerText = inventory.length;
+
+            // Calculate Total Value
+            const totalValue = inventory.reduce((acc, item) => acc + (parseFloat(item.price) || 0), 0);
+            document.getElementById('statValue').innerText = formatMoney(totalValue);
+        }
+
+        initDashboard();
     </script>
 </body>
 </html>

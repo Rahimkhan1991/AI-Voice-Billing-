@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<td class="px-8 py-5 font-black text-indigo-600">${formatMoney(p.price)}</td><html lang="en">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Inventory - AI POS Pro</title>
+    <title>Inventory Management - AI POS Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,125 +11,185 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
     </style>
 </head>
-<body>
+<body class="min-h-screen">
+
     <nav class="bg-slate-900 text-white p-5 flex justify-between items-center shadow-xl sticky top-0 z-50">
         <div class="flex items-center gap-3 font-black italic text-xl">
-            <i class="fa-solid fa-boxes-stacked text-indigo-500 text-2xl"></i> AI-POS <span class="text-indigo-500">PRO</span>
+            <i class="fa-solid fa-boxes-stacked text-indigo-500 text-2xl"></i> <span id="navBizName">AI-POS PRO</span>
         </div>
         <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest">
-            <a href="dashboard.html" class="opacity-60 hover:opacity-100 transition">Dashboard</a>
+            <a href="index.html" class="opacity-60 hover:opacity-100 transition">Dashboard</a>
             <a href="billing.html" class="opacity-60 hover:opacity-100 transition">Billing</a>
             <a href="inventory.html" class="text-indigo-400">Inventory</a>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div class="lg:col-span-4">
+        
+        <div class="lg:col-span-5">
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 sticky top-28">
-                <h2 id="formTitle" class="text-xl font-black text-slate-800 mb-6">Product Setup</h2>
-                <div class="space-y-4">
+                <h2 id="formTitle" class="text-xl font-black text-slate-800 mb-6">Product Information</h2>
+                <div class="grid grid-cols-2 gap-4">
                     <input type="hidden" id="editId">
-                    <input type="text" id="pName" placeholder="Product Name" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500">
                     
-                    <div class="flex gap-2">
-                        <input type="number" id="pPrice" placeholder="Price" class="w-1/2 px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500">
-                        <select id="pUnit" class="w-1/2 px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="PCS">Pieces (PCS)</option><option value="NOS">Numbers (NOS)</option>
-                            <option value="KG">Kilograms (KG)</option><option value="GM">Grams (GM)</option>
-                            <option value="LTR">Liters (LTR)</option><option value="ML">Milliliters (ML)</option>
-                            <option value="MTR">Meters (MTR)</option><option value="FT">Feet (FT)</option>
-                            <option value="SQFT">Square Feet</option>
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Product Name*</label>
+                        <input type="text" id="pName" placeholder="Mandatory" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 mt-1 text-sm">
+                    </div>
+
+                    <div class="col-span-1">
+                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Category*</label>
+                        <select id="pCategory" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 mt-1 text-sm">
+                            <option value="Grocery">Grocery</option>
+                            <option value="Dairy">Dairy</option>
+                            <option value="Beverages">Beverages</option>
+                            <option value="Snacks">Snacks</option>
+                            <option value="Hardware">Hardware</option>
+                            <option value="Pharmacy">Pharmacy</option>
+                            <option value="Textiles">Textiles</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
 
-                    <select id="pCat" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500">
-                        <option>Groceries</option><option>Hardware</option><option>Dairy</option><option>Textiles</option><option>Other</option>
-                    </select>
-
-                    <div class="flex items-center gap-3 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                        <input type="checkbox" id="askQty" class="w-5 h-5 rounded text-indigo-600">
-                        <label for="askQty" class="text-xs font-bold text-indigo-900 leading-tight">Prompt for exact measurement during billing</label>
+                    <div class="col-span-1">
+                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Unit*</label>
+                        <select id="pUnit" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 mt-1 text-sm">
+                            <option value="PCS">PCS</option><option value="KG">KG</option>
+                            <option value="LTR">LTR</option><option value="MTR">MTR</option>
+                            <option value="SQFT">SQFT</option><option value="NOS">NOS</option>
+                            <option value="PKT">Packet</option><option value="BTL">Bottle</option>
+                        </select>
                     </div>
 
-                    <button onclick="saveProduct()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg">Save Product</button>
-                    <button onclick="resetForm()" class="w-full text-[10px] font-black uppercase text-slate-400 text-center block">Clear</button>
+                    <div class="col-span-1">
+                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Purchase Price</label>
+                        <input type="number" id="pPurchase" oninput="calculateStockValue()" placeholder="0.00" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 mt-1 text-sm">
+                    </div>
+
+                    <div class="col-span-1">
+                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Sale Price*</label>
+                        <input type="number" id="pPrice" placeholder="Mandatory" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 mt-1 text-sm">
+                    </div>
+
+                    <div class="col-span-1">
+                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Opening Stock</label>
+                        <input type="number" id="pStock" oninput="calculateStockValue()" placeholder="0" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-indigo-500 mt-1 text-sm">
+                    </div>
+
+                    <div class="col-span-1">
+                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Stock Value</label>
+                        <input type="text" id="pStockValue" readonly placeholder="0.00" class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 mt-1 text-sm font-bold text-indigo-600">
+                    </div>
                 </div>
+
+                <div class="mt-6 flex items-center gap-3 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                    <input type="checkbox" id="askQty" class="w-5 h-5 rounded text-indigo-600">
+                    <label for="askQty" class="text-[11px] font-bold text-indigo-900 leading-tight">
+                        Prompt for measurement during billing (Weight/Length/Area)
+                    </label>
+                </div>
+
+                <button onclick="saveProduct()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition transform active:scale-95 mt-6">
+                    Save Product
+                </button>
+                <button onclick="resetForm()" class="w-full text-[10px] font-black uppercase text-slate-400 hover:text-slate-600 mt-3">Clear Form</button>
             </div>
         </div>
 
-        <div class="lg:col-span-8">
-            <div class="bg-white rounded-[2.5rem] shadow-sm overflow-hidden border border-slate-100">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        <tr>
-                            <th class="px-8 py-4">Item</th>
-                            <th class="px-8 py-4">Unit</th>
-                            <th class="px-8 py-4">Price</th>
-                            <th class="px-8 py-4">Prompt?</th>
-                            <th class="px-8 py-4"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryList" class="divide-y divide-slate-50"></tbody>
-                </table>
+        <div class="lg:col-span-7">
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-8 border-b border-slate-50 flex justify-between items-center">
+                    <h2 class="text-xl font-black text-slate-800">Inventory List</h2>
+                    <input type="text" onkeyup="renderTable(this.value)" placeholder="Search Name or Category..." class="px-5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs w-56 focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50">
+                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
+                                <th class="px-6 py-4">Item & Category</th>
+                                <th class="px-6 py-4">Stock</th>
+                                <th class="px-6 py-4">Price</th>
+                                <th class="px-6 py-4">Stock Value</th>
+                                <th class="px-6 py-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryList" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. Load the business data from the Setup page
-const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { locale: 'en-US', symbol: '$', currencyCode: 'USD' };
-
-/**
- * 2. The Universal Money Formatter
- * This handles the dots/commas and currency symbol placement automatically.
- */
-function formatMoney(amount) {
-    try {
-        return new Intl.NumberFormat(biz.locale, {
-            style: 'currency',
-            currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
-            maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
-        }).format(amount).replace('USD', biz.symbol); 
-    } catch (e) {
-        // Fallback if the locale/currency code is invalid
-        return biz.symbol + " " + parseFloat(amount).toFixed(2);
-    }
-}
+        const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { name: "AI POS", locale: "id-ID", symbol: "Rp", currencyCode: "IDR" };
         let inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
+
+        function formatMoney(amount) {
+            return new Intl.NumberFormat(biz.locale, {
+                style: 'currency',
+                currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
+                maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
+            }).format(amount).replace('USD', biz.symbol);
+        }
+
+        function calculateStockValue() {
+            const purchase = parseFloat(document.getElementById('pPurchase').value) || 0;
+            const stock = parseFloat(document.getElementById('pStock').value) || 0;
+            document.getElementById('pStockValue').value = formatMoney(purchase * stock);
+        }
 
         function saveProduct() {
             const id = document.getElementById('editId').value;
-            const item = {
+            const name = document.getElementById('pName').value.trim();
+            const category = document.getElementById('pCategory').value;
+            const salePrice = parseFloat(document.getElementById('pPrice').value);
+            const purchasePrice = parseFloat(document.getElementById('pPurchase').value) || 0;
+            const stock = parseFloat(document.getElementById('pStock').value) || 0;
+
+            if(!name || isNaN(salePrice)) return alert("Name and Sale Price are mandatory!");
+
+            const product = {
                 id: id ? parseInt(id) : Date.now(),
-                name: document.getElementById('pName').value,
-                price: parseFloat(document.getElementById('pPrice').value),
+                name,
+                category,
+                purchasePrice,
+                price: salePrice,
                 unit: document.getElementById('pUnit').value,
-                cat: document.getElementById('pCat').value,
+                stock,
                 askQty: document.getElementById('askQty').checked
             };
 
             if(id) {
                 const idx = inventory.findIndex(p => p.id == id);
-                inventory[idx] = item;
+                inventory[idx] = product;
             } else {
-                inventory.push(item);
+                inventory.push(product);
             }
 
             localStorage.setItem('AI_POS_INVENTORY', JSON.stringify(inventory));
-            renderTable(); resetForm();
+            renderTable();
+            resetForm();
         }
 
-        function renderTable() {
+        function renderTable(filter = "") {
             const list = document.getElementById('inventoryList');
-            list.innerHTML = inventory.map(p => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-8 py-5 font-bold text-slate-700 capitalize">${p.name}</td>
-                    <td class="px-8 py-5"><span class="text-[10px] bg-slate-100 px-2 py-1 rounded font-black">${p.unit}</span></td>
-                    <td class="px-8 py-5 font-black text-indigo-600">$${p.price.toFixed(2)}</td>
-                    <td class="px-8 py-5 text-xs font-bold ${p.askQty ? 'text-amber-500':'text-slate-300'}">${p.askQty ? 'YES':'NO'}</td>
-                    <td class="px-8 py-5 text-right">
-                        <button onclick="editProduct(${p.id})" class="text-indigo-400 mx-2"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteProduct(${p.id})" class="text-red-300"><i class="fa-solid fa-trash"></i></button>
+            const data = filter ? inventory.filter(p => 
+                p.name.toLowerCase().includes(filter.toLowerCase()) || 
+                p.category.toLowerCase().includes(filter.toLowerCase())
+            ) : inventory;
+            
+            list.innerHTML = data.map(p => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-5">
+                        <p class="font-bold text-slate-800 capitalize text-sm">${p.name}</p>
+                        <p class="text-[9px] font-black text-indigo-400 uppercase tracking-tighter">${p.category} | ${p.unit}</p>
+                    </td>
+                    <td class="px-6 py-5 font-bold text-slate-600 text-xs">${p.stock}</td>
+                    <td class="px-6 py-5 font-black text-slate-900 text-xs">${formatMoney(p.price)}</td>
+                    <td class="px-6 py-5 font-black text-slate-400 text-xs">${formatMoney(p.purchasePrice * p.stock)}</td>
+                    <td class="px-6 py-5 text-right space-x-2">
+                        <button onclick="editProduct(${p.id})" class="text-indigo-400 hover:scale-110 transition-transform"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="text-red-300 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -139,19 +199,36 @@ function formatMoney(amount) {
             const p = inventory.find(i => i.id == id);
             document.getElementById('editId').value = p.id;
             document.getElementById('pName').value = p.name;
-            document.getElementById('pPrice').value = p.price;
+            document.getElementById('pCategory').value = p.category;
             document.getElementById('pUnit').value = p.unit;
-            document.getElementById('pCat').value = p.cat;
+            document.getElementById('pPurchase').value = p.purchasePrice;
+            document.getElementById('pPrice').value = p.price;
+            document.getElementById('pStock').value = p.stock;
             document.getElementById('askQty').checked = p.askQty;
+            calculateStockValue();
+            document.getElementById('formTitle').innerText = "Update Product";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function deleteProduct(id) {
-            inventory = inventory.filter(p => p.id != id);
-            localStorage.setItem('AI_POS_INVENTORY', JSON.stringify(inventory));
-            renderTable();
+            if(confirm("Delete this item?")) {
+                inventory = inventory.filter(p => p.id != id);
+                localStorage.setItem('AI_POS_INVENTORY', JSON.stringify(inventory));
+                renderTable();
+            }
         }
 
-        function resetForm() { document.getElementById('editId').value = ""; document.getElementById('pName').value = ""; document.getElementById('pPrice').value = ""; }
+        function resetForm() {
+            document.getElementById('editId').value = "";
+            document.getElementById('pName').value = "";
+            document.getElementById('pPurchase').value = "";
+            document.getElementById('pPrice').value = "";
+            document.getElementById('pStock').value = "";
+            document.getElementById('pStockValue').value = "";
+            document.getElementById('formTitle').innerText = "Product Information";
+        }
+
+        document.getElementById('navBizName').innerText = biz.name;
         renderTable();
     </script>
 </body>
