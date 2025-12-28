@@ -11,7 +11,6 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .sidebar-item:hover { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
         .sidebar-active { background: #4f46e5; color: white !important; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4); }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); }
     </style>
 </head>
 <body class="min-h-screen flex">
@@ -24,7 +23,7 @@
         </div>
 
         <nav class="flex-grow px-4 space-y-2">
-            <a href="index.html" class="sidebar-active flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition">
+            <a href="dashboard.html" class="sidebar-active flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition">
                 <i class="fa-solid fa-house-chimney w-5"></i> Dashboard
             </a>
             <a href="billing.html" class="sidebar-item text-slate-500 flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition">
@@ -46,22 +45,10 @@
     </aside>
 
     <main class="flex-grow ml-64 p-8">
-        
         <header class="flex justify-between items-center mb-10">
             <div>
                 <h1 class="text-3xl font-black text-slate-800 tracking-tight" id="welcomeMsg">Hello!</h1>
-                <p class="text-slate-500 font-medium">Manage your <span id="displayIndustry" class="text-indigo-600 font-bold uppercase text-xs"></span> business.</p>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="text-right hidden md:block">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Business Status</p>
-                    <p class="text-xs font-bold text-emerald-500 flex items-center gap-1 justify-end">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Online
-                    </p>
-                </div>
-                <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200">
-                    <i class="fa-solid fa-user"></i>
-                </div>
+                <p class="text-slate-500 font-medium italic" id="displayIndustry">Store Management</p>
             </div>
         </header>
 
@@ -71,7 +58,7 @@
                     <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-cash-register"></i></div>
                     <span class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md">LIVE</span>
                 </div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today's Revenue</p>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Revenue</p>
                 <h2 id="statRevenue" class="text-2xl font-black text-slate-800">0</h2>
             </div>
 
@@ -88,7 +75,7 @@
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-boxes-stacked"></i></div>
                 </div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Items in Stock</p>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Items In Stock</p>
                 <h2 id="statItems" class="text-2xl font-black text-slate-800">0</h2>
             </div>
 
@@ -101,116 +88,77 @@
             </div>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-8 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-black text-slate-800 uppercase tracking-tight">Intelligence Panel</h3>
-                    <a href="reports.html" class="text-indigo-600 text-[10px] font-black uppercase">Analytics <i class="fa-solid fa-chevron-right ml-1"></i></a>
-                </div>
-                
-                <div class="space-y-4">
-                    <div class="p-6 bg-amber-50 border border-amber-100 rounded-3xl">
-                        <p class="text-[10px] font-black text-amber-600 uppercase mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Critical Stock Alerts</p>
-                        <div id="lowStockAlert" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-                    </div>
-
-                    <div class="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex justify-between items-center">
-                        <div>
-                            <p class="text-[10px] font-black text-slate-400 uppercase">Registered Address</p>
-                            <p id="bizDetailsDisplay" class="text-xs font-bold text-slate-700"></p>
-                        </div>
-                        <i class="fa-solid fa-map-location-dot text-slate-200 text-2xl"></i>
-                    </div>
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                <h3 class="text-sm font-black text-slate-800 uppercase mb-4"><i class="fa-solid fa-bell text-amber-500 mr-2"></i> Stock Alerts</h3>
+                <div id="lowStockAlert" class="space-y-3"></div>
             </div>
-
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
-                    <h3 class="text-xl font-black mb-2 relative z-10">Sales Terminal</h3>
-                    <p class="text-indigo-100 text-xs mb-6 relative z-10">Launch AI billing to start processing transactions.</p>
-                    <a href="billing.html" class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-black text-xs inline-block relative z-10 hover:shadow-lg transition">OPEN POS</a>
-                    <i class="fa-solid fa-microphone-lines absolute -right-4 -bottom-4 text-8xl text-indigo-500/30"></i>
-                </div>
-
-                <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                    <h3 class="text-sm font-black text-slate-800 uppercase mb-4">Cloud Backup</h3>
-                    <p class="text-slate-400 text-[10px] font-bold uppercase mb-4 leading-relaxed">Your data is currently stored locally.</p>
-                    <a href="setup.html?edit=true" class="bg-slate-50 text-slate-600 px-4 py-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 border border-slate-100">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Manage Data
-                    </a>
+            
+            <div class="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                <h3 class="text-xl font-black mb-2 relative z-10">Quick Actions</h3>
+                <p class="text-indigo-100 text-xs mb-6 relative z-10">Jump to POS terminal or check history.</p>
+                <div class="flex gap-4 relative z-10">
+                    <a href="billing.html" class="bg-white text-indigo-600 px-4 py-2 rounded-xl font-black text-[10px] uppercase">New Bill</a>
+                    <a href="reports.html" class="bg-indigo-500 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase border border-indigo-400">Full Reports</a>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        // --- 1. DATA RECOVERY ---
-        const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA'));
+        // --- DATA RECOVERY ---
+        // Same keys as your Reports Page
+        const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { name: "Store", locale: "id-ID", symbol: "Rp", currencyCode: "IDR" };
         const inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
         const sales = JSON.parse(localStorage.getItem('AI_POS_SALES')) || [];
 
-        // Protection: Redirect if no setup
-        if (!biz) { window.location.href = 'setup.html'; }
-
-        // --- 2. CURRENCY HELPER ---
         function formatMoney(amount) {
-            try {
-                return new Intl.NumberFormat(biz.locale, {
-                    style: 'currency',
-                    currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
-                    maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
-                }).format(amount).replace('USD', biz.symbol); 
-            } catch (e) {
-                return (biz.symbol || '$') + " " + parseFloat(amount).toLocaleString();
-            }
+            return new Intl.NumberFormat(biz.locale, {
+                style: 'currency',
+                currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
+                maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
+            }).format(amount).replace('USD', biz.symbol);
         }
 
-        // --- 3. DASHBOARD INITIALIZATION ---
         function initDashboard() {
-            // UI Branding
             document.getElementById('navBizName').innerText = biz.name;
             document.getElementById('welcomeMsg').innerText = `Hello, ${biz.name}!`;
-            document.getElementById('displayIndustry').innerText = biz.industry;
-            document.getElementById('bizDetailsDisplay').innerText = biz.address || 'Address not registered';
+            document.getElementById('displayIndustry').innerText = biz.industry || "General Retail";
 
-            // REVENUE CALCULATION: Sum 'total' from sales for today
-            const today = new Date().toLocaleDateString();
-            const todaySales = sales.filter(s => s.date.includes(today));
-            const revenue = todaySales.reduce((acc, s) => acc + (parseFloat(s.total) || 0), 0);
+            // Revenue calculation
+            const revenue = sales.reduce((acc, tx) => acc + (parseFloat(tx.total) || 0), 0);
             document.getElementById('statRevenue').innerText = formatMoney(revenue);
 
-            // PROFIT CALCULATION: Sum 'profit' from all sales recorded
-            const totalProfit = sales.reduce((acc, s) => acc + (parseFloat(s.profit) || 0), 0);
-            document.getElementById('statProfit').innerText = formatMoney(totalProfit);
+            // Profit calculation
+            const profit = sales.reduce((acc, tx) => acc + (parseFloat(tx.profit) || 0), 0);
+            document.getElementById('statProfit').innerText = formatMoney(profit);
 
-            // ITEM COUNT: Total unique items in inventory
+            // Item count
             document.getElementById('statItems').innerText = inventory.length;
 
-            // ASSET VALUE: Sum (Purchase Price * Stock) for all items
-            const totalAssetValue = inventory.reduce((acc, item) => {
+            // Asset Value calculation
+            const assetValue = inventory.reduce((acc, item) => {
                 const buyPrice = parseFloat(item.purchasePrice) || 0;
                 const qty = parseFloat(item.stock) || 0;
                 return acc + (buyPrice * qty);
             }, 0);
-            document.getElementById('statValue').innerText = formatMoney(totalAssetValue);
+            document.getElementById('statValue').innerText = formatMoney(assetValue);
 
-            // STOCK ALERTS: Identify items with stock less than 5
-            const lowStockItems = inventory.filter(p => p.stock < 5);
+            // Low Stock alerts
+            const lowStock = inventory.filter(p => p.stock < 5);
             const alertBox = document.getElementById('lowStockAlert');
-            
-            if (lowStockItems.length > 0) {
-                alertBox.innerHTML = lowStockItems.slice(0, 4).map(p => `
-                    <div class="flex items-center justify-between bg-white px-4 py-3 rounded-2xl shadow-sm border border-amber-200">
+            if(lowStock.length > 0) {
+                alertBox.innerHTML = lowStock.map(p => `
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <span class="text-xs font-bold text-slate-700">${p.name}</span>
-                        <span class="text-[10px] font-black text-red-500 bg-red-50 px-2 py-1 rounded-lg">${p.stock} LEFT</span>
+                        <span class="text-[10px] font-black text-red-500 uppercase">${p.stock} Left</span>
                     </div>
                 `).join('');
             } else {
-                alertBox.innerHTML = `<p class="text-xs text-slate-400 italic py-2">Stock levels are currently healthy.</p>`;
+                alertBox.innerHTML = `<p class="text-xs text-slate-400 italic text-center">No alerts. Stock is healthy.</p>`;
             }
         }
 
-        // Run On Load
         initDashboard();
     </script>
 </body>
