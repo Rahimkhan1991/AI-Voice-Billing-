@@ -109,61 +109,78 @@
     </main>
 
     <script>
-        function formatMoney(amount, biz) {
+    // --- 1. UNIVERSAL DATA FETCHING ---
+    function initDashboard() {
+        console.log("Syncing Dashboard Data...");
+
+        // Fetch Raw Data
+        const bizRaw = localStorage.getItem('AI_POS_BIZ_DATA');
+        const invRaw = localStorage.getItem('AI_POS_INVENTORY');
+        const salesRaw = localStorage.getItem('AI_POS_SALES');
+
+        // Parse with Fallbacks
+        const biz = bizRaw ? JSON.parse(bizRaw) : { name: "Store", locale: "id-ID", symbol: "Rp", currencyCode: "IDR" };
+        const inventory = invRaw ? JSON.parse(invRaw) : [];
+        const sales = salesRaw ? JSON.parse(salesRaw) : [];
+
+        // --- 2. MONEY FORMATTER ---
+        const formatMoney = (amount) => {
             return new Intl.NumberFormat(biz.locale, {
                 style: 'currency',
                 currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
                 maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
             }).format(amount).replace('USD', biz.symbol);
+        };
+
+        // --- 3. UI BRANDING ---
+        document.getElementById('navBizName').innerText = biz.name || "AI-POS PRO";
+        document.getElementById('welcomeMsg').innerText = `Hello, ${biz.name || 'User'}!`;
+        document.getElementById('displayIndustry').innerText = biz.industry || "General Retail";
+        if(document.getElementById('bizDetailsDisplay')) {
+            document.getElementById('bizDetailsDisplay').innerText = biz.address || 'Address not set';
         }
 
-        function initDashboard() {
-            // Re-fetch data every time function runs to ensure fresh state
-            const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { name: "Store", locale: "id-ID", symbol: "Rp", currencyCode: "IDR" };
-            const inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
-            const sales = JSON.parse(localStorage.getItem('AI_POS_SALES')) || [];
+        // --- 4. CALCULATION ENGINE (WITH STRICT PARSING) ---
+        
+        // REVENUE: Sum of all 'total' fields in sales
+        const revenue = sales.reduce((acc, tx) => acc + (parseFloat(tx.total) || 0), 0);
+        document.getElementById('statRevenue').innerText = formatMoney(revenue);
 
-            // UI Header
-            document.getElementById('navBizName').innerText = biz.name;
-            document.getElementById('welcomeMsg').innerText = `Hello, ${biz.name}!`;
-            document.getElementById('displayIndustry').innerText = biz.industry || "General Retail";
+        // PROFIT: Sum of all 'profit' fields in sales
+        const profit = sales.reduce((acc, tx) => acc + (parseFloat(tx.profit) || 0), 0);
+        document.getElementById('statProfit').innerText = formatMoney(profit);
 
-            // 1. REVENUE (Calculated like Reports page)
-            const revenue = sales.reduce((acc, tx) => acc + (Number(tx.total) || 0), 0);
-            document.getElementById('statRevenue').innerText = formatMoney(revenue, biz);
+        // INVENTORY COUNT: Number of unique items
+        document.getElementById('statItems').innerText = inventory.length;
 
-            // 2. PROFIT (Calculated like Reports page)
-            const profit = sales.reduce((acc, tx) => acc + (Number(tx.profit) || 0), 0);
-            document.getElementById('statProfit').innerText = formatMoney(profit, biz);
+        // ASSET VALUE: Sum of (Purchase Price * Stock)
+        const assetValue = inventory.reduce((acc, item) => {
+            const pPrice = parseFloat(item.purchasePrice) || 0;
+            const sQty = parseFloat(item.stock) || 0;
+            return acc + (pPrice * sQty);
+        }, 0);
+        document.getElementById('statValue').innerText = formatMoney(assetValue);
 
-            // 3. STOCK COUNT
-            document.getElementById('statItems').innerText = inventory.length;
-
-            // 4. ASSET VALUE (Inventory Value)
-            const assetValue = inventory.reduce((acc, item) => {
-                const buyPrice = Number(item.purchasePrice) || 0;
-                const stockQty = Number(item.stock) || 0;
-                return acc + (buyPrice * stockQty);
-            }, 0);
-            document.getElementById('statValue').innerText = formatMoney(assetValue, biz);
-
-            // 5. LOW STOCK ALERTS
-            const lowStock = inventory.filter(p => Number(p.stock) < 5);
-            const alertBox = document.getElementById('lowStockAlert');
-            if(lowStock.length > 0) {
-                alertBox.innerHTML = lowStock.map(p => `
+        // --- 5. STOCK ALERTS ---
+        const alertBox = document.getElementById('lowStockAlert');
+        const lowStockItems = inventory.filter(p => (parseFloat(p.stock) || 0) < 5);
+        
+        if (alertBox) {
+            if (lowStockItems.length > 0) {
+                alertBox.innerHTML = lowStockItems.map(p => `
                     <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <span class="text-xs font-bold text-slate-700">${p.name}</span>
                         <span class="text-[10px] font-black text-red-500 uppercase">${p.stock} Left</span>
                     </div>
                 `).join('');
             } else {
-                alertBox.innerHTML = `<p class="text-xs text-slate-400 italic text-center">No alerts. Stock is healthy.</p>`;
+                alertBox.innerHTML = `<p class="text-xs text-slate-400 italic text-center">Stock is healthy.</p>`;
             }
         }
+    }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', initDashboard);
-    </script>
+    // Run when page is fully loaded
+    window.addEventListener('load', initDashboard);
+</script>
 </body>
 </html>
