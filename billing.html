@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Billing - AI POS Pro</title>
+    <title>AI POS PRO - Universal Billing</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,8 +11,9 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
         .mic-active { animation: pulse 1s infinite; background: #ef4444 !important; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 100% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } }
+        .hide-scroll::-webkit-scrollbar { display: none; }
         
-        /* Adaptive Modal Styling */
+        /* Measurement Modal Styling (As per your Image) */
         .measurement-modal { background-color: #003049; color: white; border-radius: 8px; border: 1px solid #ffffff20; }
         .input-box { background: white; color: #333; border-radius: 4px; text-align: center; font-size: 2rem; font-weight: 800; border: none; }
         .unit-label { color: #888; font-size: 1.2rem; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-weight: bold; }
@@ -21,29 +22,49 @@
 <body class="h-screen overflow-hidden flex flex-col">
 
     <nav class="bg-slate-900 text-white p-4 flex justify-between items-center shadow-xl shrink-0">
-        <div class="flex items-center gap-2 font-black italic"><i class="fa-solid fa-microchip text-indigo-500"></i> <span id="navBizName">AI-POS PRO</span></div>
+        <div class="flex items-center gap-3 font-black italic">
+            <i class="fa-solid fa-microphone-lines text-indigo-500 text-xl"></i> 
+            <span id="navBizName">AI-POS PRO</span>
+        </div>
         <div class="flex gap-6 text-[10px] font-black uppercase tracking-widest">
-            <a href="index.html">Dashboard</a><a href="billing.html" class="text-indigo-400">Billing</a><a href="inventory.html">Inventory</a>
+            <a href="dashboard.html" class="opacity-50 hover:opacity-100 transition">Dashboard</a>
+            <a href="billing.html" class="text-indigo-400">Billing</a>
+            <a href="inventory.html" class="opacity-50 hover:opacity-100 transition">Inventory</a>
         </div>
     </nav>
 
     <main class="flex-grow flex overflow-hidden">
-        <section class="flex-grow p-6 overflow-y-auto" id="posGrid"></section>
+        
+        <section class="flex-grow p-6 flex flex-col overflow-hidden">
+            <div class="flex gap-3 mb-6 overflow-x-auto hide-scroll pb-2" id="categoryTabs"></div>
+            
+            <div class="flex-grow overflow-y-auto" id="posGrid"></div>
+        </section>
 
-        <aside class="w-[420px] bg-white border-l flex flex-col shadow-2xl">
-            <div class="p-6 border-b flex justify-between items-center bg-white sticky top-0">
-                <h2 class="font-black text-xs uppercase tracking-widest text-slate-400">Current Receipt</h2>
+        <aside class="w-[420px] bg-white border-l border-slate-200 flex flex-col shadow-2xl">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 class="font-black text-xs uppercase tracking-widest text-slate-400">Live Receipt</h2>
                 <button onclick="clearCart()" class="text-red-500 text-[10px] font-black uppercase">Clear All</button>
             </div>
+
             <div class="flex-grow overflow-y-auto p-4 space-y-3" id="cartItems"></div>
+
             <div class="p-8 bg-slate-50 border-t space-y-4">
-                <div class="bg-slate-900 rounded-3xl p-6 text-center text-white relative shadow-xl">
-                    <button id="micBtn" class="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-microphone text-xl"></i></button>
-                    <p id="micText" class="text-[10px] font-black uppercase opacity-60">AI Voice Ready</p>
+                <div class="bg-slate-900 rounded-[2.5rem] p-6 text-center text-white relative shadow-xl">
+                    <button id="micBtn" class="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center mx-auto mb-2 shadow-lg active:scale-95 transition-all">
+                        <i class="fa-solid fa-microphone text-xl"></i>
+                    </button>
+                    <p id="micText" class="text-[10px] font-black uppercase tracking-widest opacity-60">Hold to Speak (AI Mode)</p>
                 </div>
-                <div class="flex justify-between items-center">
-                    <div><p class="text-[10px] font-black text-slate-400 uppercase">Grand Total</p><h2 class="text-4xl font-black text-slate-900 leading-none"><span id="grandTotal">0.00</span></h2></div>
-                    <button onclick="window.print()" class="bg-indigo-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg hover:bg-indigo-700 transition"><i class="fa-solid fa-print"></i></button>
+
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Due</p>
+                        <h2 class="text-4xl font-black text-slate-900 leading-none"><span id="grandTotal">0.00</span></h2>
+                    </div>
+                    <button onclick="window.print()" class="bg-indigo-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg hover:bg-indigo-700 transition">
+                        <i class="fa-solid fa-print text-xl"></i>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -82,31 +103,64 @@
     </div>
 
     <script>
+        // --- 1. INITIALIZATION & HELPERS ---
         const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { locale: 'id-ID', symbol: 'Rp', currencyCode: 'IDR' };
         let inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
         let cart = [];
         let tempItem = null;
+        let activeCategory = "All";
 
         function formatMoney(amount) {
             return new Intl.NumberFormat(biz.locale, {
-                style: 'currency', currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
+                style: 'currency',
+                currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
                 maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
             }).format(amount).replace('USD', biz.symbol);
         }
 
+        // --- 2. CATEGORY TABS LOGIC ---
+        function renderCategoryTabs() {
+            const container = document.getElementById('categoryTabs');
+            const categories = ["All", ...new Set(inventory.map(p => p.category))];
+            
+            container.innerHTML = categories.map(cat => `
+                <button onclick="filterByCategory('${cat}')" 
+                    class="px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition whitespace-nowrap 
+                    ${activeCategory === cat ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-slate-400 hover:bg-slate-50'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function filterByCategory(cat) {
+            activeCategory = cat;
+            renderCategoryTabs();
+            renderPOS();
+        }
+
+        // --- 3. PRODUCT GRID RENDERING ---
         function renderPOS() {
             const grid = document.getElementById('posGrid');
+            const filtered = activeCategory === "All" ? inventory : inventory.filter(p => p.category === activeCategory);
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="text-center py-20 text-slate-300 font-bold italic">No items found in ${activeCategory}</div>`;
+                return;
+            }
+
             grid.innerHTML = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                ${inventory.map(p => `
-                    <div onclick="handleClick(${p.id})" class="bg-white p-6 rounded-[2.5rem] border shadow-sm hover:shadow-2xl transition cursor-pointer group">
-                        <p class="text-[9px] font-black text-slate-300 uppercase mb-2">${p.unit}</p>
-                        <h3 class="font-bold text-slate-800 capitalize text-lg group-hover:text-indigo-600">${p.name}</h3>
+                ${filtered.map(p => `
+                    <div onclick="handleClick(${p.id})" class="bg-white p-6 rounded-[2.5rem] border shadow-sm hover:shadow-2xl transition cursor-pointer group relative overflow-hidden">
+                        <p class="text-[9px] font-black text-indigo-400 uppercase mb-2 tracking-tighter">${p.category} | ${p.unit}</p>
+                        <h3 class="font-bold text-slate-800 capitalize text-lg group-hover:text-indigo-600 transition-colors">${p.name}</h3>
                         <p class="text-indigo-600 font-black text-sm mt-1">${formatMoney(p.price)}</p>
+                        ${p.askQty ? '<div class="absolute top-4 right-4 w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_#f59e0b]"></div>' : ''}
                     </div>
                 `).join('')}
             </div>`;
         }
 
+        // --- 4. MEASUREMENT MODAL LOGIC ---
         function handleClick(id) {
             const p = inventory.find(item => item.id == id);
             if (p.askQty) {
@@ -125,60 +179,66 @@
         }
 
         function setupModalUnits(unit) {
-            const primary = document.getElementById('primaryLabel');
-            const secondary = document.getElementById('secondaryLabel');
-            const secContainer = document.getElementById('secondaryContainer');
+            const pLabel = document.getElementById('primaryLabel');
+            const sLabel = document.getElementById('secondaryLabel');
+            const sCont = document.getElementById('secondaryContainer');
             
-            secContainer.style.display = "block";
-            if (unit === "KG") { primary.innerText = "kg"; secondary.innerText = "gm"; }
-            else if (unit === "LTR") { primary.innerText = "ltr"; secondary.innerText = "ml"; }
-            else if (unit === "MTR") { primary.innerText = "mtr"; secondary.innerText = "cm"; }
-            else { secContainer.style.display = "none"; primary.innerText = unit; }
+            sCont.style.display = "block";
+            if (unit === "KG") { pLabel.innerText = "kg"; sLabel.innerText = "gm"; }
+            else if (unit === "LTR") { pLabel.innerText = "ltr"; sLabel.innerText = "ml"; }
+            else if (unit === "MTR") { pLabel.innerText = "mtr"; sLabel.innerText = "cm"; }
+            else { sCont.style.display = "none"; pLabel.innerText = unit; }
         }
 
         function convertUnits(type) {
-            const pVal = document.getElementById('primaryQty');
-            const sVal = document.getElementById('secondaryQty');
-            if (type === 'primary') sVal.value = pVal.value * 1000;
-            else pVal.value = sVal.value / 1000;
+            const pQty = document.getElementById('primaryQty');
+            const sQty = document.getElementById('secondaryQty');
+            if (type === 'primary') sQty.value = pQty.value * 1000;
+            else pQty.value = sQty.value / 1000;
         }
 
         function confirmQtyAdd() {
             const qty = parseFloat(document.getElementById('primaryQty').value);
-            if (qty > 0) { addToCart(tempItem, qty); closeQtyModal(); }
+            if (qty > 0) {
+                addToCart(tempItem, qty);
+                closeQtyModal();
+            }
         }
 
         function closeQtyModal() { document.getElementById('qtyModal').classList.replace('flex', 'hidden'); }
 
+        // --- 5. CART & VOICE ENGINE ---
         function addToCart(p, qty) {
             const exists = cart.find(c => c.id === p.id);
             if(exists) exists.qty += qty;
             else cart.push({ ...p, qty });
             updateCart();
+            speak(`Added ${qty} ${p.name}`);
         }
 
         function updateCart() {
             const container = document.getElementById('cartItems');
             let total = 0;
             container.innerHTML = cart.map((item, idx) => {
-                const sub = item.qty * item.price; total += sub;
-                return `<div class="bg-white p-4 rounded-3xl border flex items-center justify-between shadow-sm">
-                    <div><p class="font-bold text-slate-800 text-sm capitalize">${item.name}</p><p class="text-[9px] font-bold text-slate-400 uppercase">${item.qty} ${item.unit} x ${formatMoney(item.price)}</p></div>
-                    <div class="text-right"><p class="font-black text-indigo-600 text-sm">${formatMoney(sub)}</p><button onclick="cart.splice(${idx},1); updateCart()" class="text-[10px] font-bold text-red-300">REMOVE</button></div>
-                </div>`;
+                const sub = item.qty * item.price;
+                total += sub;
+                return `
+                    <div class="bg-white p-4 rounded-3xl border flex items-center justify-between shadow-sm">
+                        <div class="flex-grow">
+                            <p class="font-bold text-slate-800 capitalize text-sm">${item.name}</p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">${item.qty} ${item.unit} x ${formatMoney(item.price)}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-indigo-600 text-sm">${formatMoney(sub)}</p>
+                            <button onclick="cart.splice(${idx},1); updateCart()" class="text-[10px] font-black text-red-300 hover:text-red-500 uppercase">Remove</button>
+                        </div>
+                    </div>`;
             }).join('');
             document.getElementById('grandTotal').innerText = formatMoney(total);
         }
 
-        // KEYBOARD EVENTS
-        window.addEventListener('keydown', (e) => {
-            if (document.getElementById('qtyModal').classList.contains('flex')) {
-                if (e.key === "Enter") confirmQtyAdd();
-                if (e.key === "Escape") closeQtyModal();
-            }
-        });
-
-        const SpeechRecognition = window.webkitSpeechRecognition;
+        // Voice Recognition Implementation
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if(SpeechRecognition) {
             const rec = new SpeechRecognition();
             const btn = document.getElementById('micBtn');
@@ -186,11 +246,13 @@
             rec.onend = () => btn.classList.remove('mic-active');
             rec.onresult = (e) => {
                 const text = e.results[0][0].transcript.toLowerCase();
-                const match = text.match(/(\d+(?:\.\d+)?|half)?\s*(\w+)?\s*(\w+)/i);
+                const match = text.match(/(\d+(?:\.\d+)?|half|quarter)?\s*(kg|gm|ltr|ml|mtr|nos|pcs)?\s*(\w+)/i);
                 if(match) {
                     let qty = parseFloat(match[1]) || 1;
                     if(match[1] === 'half') qty = 0.5;
-                    const item = inventory.find(i => match[3].includes(i.name.toLowerCase()));
+                    if(match[1] === 'quarter') qty = 0.25;
+                    const itemName = match[3];
+                    const item = inventory.find(i => itemName.includes(i.name.toLowerCase()) || i.name.toLowerCase().includes(itemName));
                     if(item) addToCart(item, qty);
                 }
             };
@@ -198,7 +260,24 @@
             btn.addEventListener('mouseup', () => rec.stop());
         }
 
+        function speak(m) {
+            const u = new SpeechSynthesisUtterance(m);
+            u.rate = 1.1; window.speechSynthesis.speak(u);
+        }
+
+        function clearCart() { cart = []; updateCart(); }
+
+        // Keyboard Event Listeners for Modal
+        window.addEventListener('keydown', (e) => {
+            if (document.getElementById('qtyModal').classList.contains('flex')) {
+                if (e.key === "Enter") confirmQtyAdd();
+                if (e.key === "Escape") closeQtyModal();
+            }
+        });
+
+        // Initialize Branding and UI
         document.getElementById('navBizName').innerText = biz.name;
+        renderCategoryTabs();
         renderPOS();
     </script>
 </body>
