@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI POS Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        .gradient-card { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <nav class="bg-slate-900 text-white p-5 flex justify-between items-center shadow-xl shrink-0">
+        <div class="flex items-center gap-3 font-black italic text-xl">
+            <i class="fa-solid fa-gauge-high text-indigo-500"></i> AI-POS PRO
+        </div>
+        <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest">
+            <a href="index.html" class="text-indigo-400">Dashboard</a>
+            <a href="billing.html" class="opacity-50 hover:opacity-100 transition">Billing</a>
+            <a href="inventory.html" class="opacity-50 hover:opacity-100 transition">Inventory</a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto w-full p-8 space-y-10">
+        
+        <section class="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-4xl font-black text-slate-800 tracking-tight">Welcome Back!</h1>
+                <p class="text-slate-500 font-medium">Here is what's happening with your store today.</p>
+            </div>
+            <div class="flex gap-4">
+                <a href="billing.html" class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-indigo-200 hover:scale-105 transition flex items-center gap-3">
+                    <i class="fa-solid fa-plus text-sm"></i> New Bill
+                </a>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Products</p>
+                    <h2 id="statItems" class="text-3xl font-black text-slate-800">0</h2>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Categories</p>
+                    <h2 id="statCats" class="text-3xl font-black text-slate-800">0</h2>
+                </div>
+            </div>
+
+            <div class="gradient-card p-8 rounded-[2.5rem] shadow-xl text-white flex items-center gap-6">
+                <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black opacity-70 uppercase tracking-widest">System Status</p>
+                    <h2 class="text-2xl font-black uppercase italic">AI Online</h2>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <a href="billing.html" class="group bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-indigo-100 transition-all">
+                <div class="flex justify-between items-start mb-10">
+                    <div class="bg-indigo-600 w-16 h-16 rounded-2xl text-white flex items-center justify-center text-2xl shadow-lg">
+                        <i class="fa-solid fa-microphone"></i>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-200 group-hover:text-indigo-600 group-hover:translate-x-2 transition-all"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-800 mb-2">Open Billing POS</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Start a new transaction using voice commands or manual selection. Optimized for high-speed sales.</p>
+            </a>
+
+            <a href="inventory.html" class="group bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-emerald-100 transition-all">
+                <div class="flex justify-between items-start mb-10">
+                    <div class="bg-slate-900 w-16 h-16 rounded-2xl text-white flex items-center justify-center text-2xl shadow-lg">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-slate-200 group-hover:text-slate-900 group-hover:translate-x-2 transition-all"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-800 mb-2">Manage Stock</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Add new products, update prices, and organize your categories. Control your store's inventory here.</p>
+            </a>
+        </section>
+
+    </main>
+
+    <script>
+        // Load data from localStorage to show stats
+        const inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
+        
+        // Calculate Stats
+        document.getElementById('statItems').innerText = inventory.length;
+        
+        // Count unique categories
+        const uniqueCats = [...new Set(inventory.map(p => p.cat))];
+        document.getElementById('statCats').innerText = uniqueCats.length;
+    </script>
+</body>
+</html>
