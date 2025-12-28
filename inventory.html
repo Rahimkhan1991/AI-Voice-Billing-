@@ -76,6 +76,25 @@
     </div>
 
     <script>
+        // 1. Load the business data from the Setup page
+const biz = JSON.parse(localStorage.getItem('AI_POS_BIZ_DATA')) || { locale: 'en-US', symbol: '$', currencyCode: 'USD' };
+
+/**
+ * 2. The Universal Money Formatter
+ * This handles the dots/commas and currency symbol placement automatically.
+ */
+function formatMoney(amount) {
+    try {
+        return new Intl.NumberFormat(biz.locale, {
+            style: 'currency',
+            currency: biz.currencyCode !== 'CUSTOM' ? biz.currencyCode : 'USD',
+            maximumFractionDigits: (biz.locale === 'id-ID' || biz.currencyCode === 'IDR') ? 0 : 2
+        }).format(amount).replace('USD', biz.symbol); 
+    } catch (e) {
+        // Fallback if the locale/currency code is invalid
+        return biz.symbol + " " + parseFloat(amount).toFixed(2);
+    }
+}
         let inventory = JSON.parse(localStorage.getItem('AI_POS_INVENTORY')) || [];
 
         function saveProduct() {
