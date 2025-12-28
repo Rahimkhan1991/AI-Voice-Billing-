@@ -18,7 +18,7 @@
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full z-50">
         <div class="p-6">
             <div class="flex items-center gap-3 font-black italic text-xl text-slate-800">
-                <i class="fa-solid fa-gauge-high text-indigo-600"></i> AI-POS <span class="text-indigo-600">PRO</span>
+                <i class="fa-solid fa-gauge-high text-indigo-600"></i> AI-POS <span id="navBizName" class="text-indigo-600">PRO</span>
             </div>
         </div>
 
@@ -56,7 +56,7 @@
         </header>
 
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 text-center md:text-left">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid fa-cash-register"></i></div>
                     <span class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md">LIVE</span>
@@ -65,7 +65,7 @@
                 <h2 id="statRevenue" class="text-2xl font-black text-slate-800">0</h2>
             </div>
 
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 text-center md:text-left">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                     <span class="text-[10px] font-black text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md">NET</span>
@@ -74,7 +74,7 @@
                 <h2 id="statProfit" class="text-2xl font-black text-slate-800">0</h2>
             </div>
 
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 text-center md:text-left">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-boxes-stacked"></i></div>
                 </div>
@@ -82,7 +82,7 @@
                 <h2 id="statItems" class="text-2xl font-black text-slate-800">0</h2>
             </div>
 
-            <div class="bg-slate-900 p-6 rounded-[2rem] shadow-xl text-white text-center md:text-left">
+            <div class="bg-slate-900 p-6 rounded-[2rem] shadow-xl text-white">
                 <div class="flex justify-between items-start mb-4">
                     <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-lg border border-white/20"><i class="fa-solid fa-wallet"></i></div>
                 </div>
@@ -95,6 +95,11 @@
             <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                 <h3 class="text-sm font-black text-slate-800 uppercase mb-4"><i class="fa-solid fa-bell text-amber-500 mr-2"></i> Stock Alerts</h3>
                 <div id="lowStockAlert" class="space-y-3"></div>
+                
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase mb-2">Registered Address</p>
+                    <p id="bizDetailsDisplay" class="text-xs font-bold text-slate-600"></p>
+                </div>
             </div>
             
             <div class="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
@@ -109,21 +114,17 @@
     </main>
 
     <script>
-    // --- 1. UNIVERSAL DATA FETCHING ---
     function initDashboard() {
         console.log("Syncing Dashboard Data...");
 
-        // Fetch Raw Data
         const bizRaw = localStorage.getItem('AI_POS_BIZ_DATA');
         const invRaw = localStorage.getItem('AI_POS_INVENTORY');
         const salesRaw = localStorage.getItem('AI_POS_SALES');
 
-        // Parse with Fallbacks
         const biz = bizRaw ? JSON.parse(bizRaw) : { name: "Store", locale: "id-ID", symbol: "Rp", currencyCode: "IDR" };
         const inventory = invRaw ? JSON.parse(invRaw) : [];
         const sales = salesRaw ? JSON.parse(salesRaw) : [];
 
-        // --- 2. MONEY FORMATTER ---
         const formatMoney = (amount) => {
             return new Intl.NumberFormat(biz.locale, {
                 style: 'currency',
@@ -132,28 +133,29 @@
             }).format(amount).replace('USD', biz.symbol);
         };
 
-        // --- 3. UI BRANDING ---
+        // Branding
         document.getElementById('navBizName').innerText = biz.name || "AI-POS PRO";
         document.getElementById('welcomeMsg').innerText = `Hello, ${biz.name || 'User'}!`;
         document.getElementById('displayIndustry').innerText = biz.industry || "General Retail";
-        if(document.getElementById('bizDetailsDisplay')) {
-            document.getElementById('bizDetailsDisplay').innerText = biz.address || 'Address not set';
+        
+        // FIXED: Now we check if element exists before setting innerText
+        const addrBox = document.getElementById('bizDetailsDisplay');
+        if(addrBox) {
+            addrBox.innerText = biz.address || 'No address registered';
         }
 
-        // --- 4. CALCULATION ENGINE (WITH STRICT PARSING) ---
-        
-        // REVENUE: Sum of all 'total' fields in sales
+        // Revenue
         const revenue = sales.reduce((acc, tx) => acc + (parseFloat(tx.total) || 0), 0);
         document.getElementById('statRevenue').innerText = formatMoney(revenue);
 
-        // PROFIT: Sum of all 'profit' fields in sales
+        // Profit
         const profit = sales.reduce((acc, tx) => acc + (parseFloat(tx.profit) || 0), 0);
         document.getElementById('statProfit').innerText = formatMoney(profit);
 
-        // INVENTORY COUNT: Number of unique items
+        // Inventory
         document.getElementById('statItems').innerText = inventory.length;
 
-        // ASSET VALUE: Sum of (Purchase Price * Stock)
+        // Assets
         const assetValue = inventory.reduce((acc, item) => {
             const pPrice = parseFloat(item.purchasePrice) || 0;
             const sQty = parseFloat(item.stock) || 0;
@@ -161,10 +163,9 @@
         }, 0);
         document.getElementById('statValue').innerText = formatMoney(assetValue);
 
-        // --- 5. STOCK ALERTS ---
+        // Alerts
         const alertBox = document.getElementById('lowStockAlert');
         const lowStockItems = inventory.filter(p => (parseFloat(p.stock) || 0) < 5);
-        
         if (alertBox) {
             if (lowStockItems.length > 0) {
                 alertBox.innerHTML = lowStockItems.map(p => `
@@ -179,8 +180,7 @@
         }
     }
 
-    // Run when page is fully loaded
     window.addEventListener('load', initDashboard);
-</script>
+    </script>
 </body>
 </html>
