@@ -33,14 +33,13 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
             <div class="lg:col-span-4 space-y-6">
                 <div class="bg-slate-900 rounded-[2.5rem] p-10 text-center text-white shadow-2xl relative overflow-hidden">
                     <button id="micBtn" class="w-28 h-28 rounded-full bg-indigo-600 flex items-center justify-center mx-auto mb-6 transition-all duration-300 shadow-xl touch-none">
                         <i class="fa-solid fa-microphone text-4xl"></i>
                     </button>
                     <h3 id="instruction" class="text-lg font-bold">Hold to Speak</h3>
-                    <p class="text-slate-400 text-xs mt-3 italic">"Add 500g Apple" or "Add 2 Milk"</p>
+                    <p class="text-slate-400 text-xs mt-3 italic">"Add 2kg Apple and 1 Milk"</p>
                 </div>
 
                 <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
@@ -49,7 +48,7 @@
                     </h2>
                     <div class="space-y-2 mb-4">
                         <input type="text" id="dbName" placeholder="Item Name" class="w-full px-4 py-2 rounded-xl bg-slate-50 border-none text-sm focus:ring-2 focus:ring-indigo-500">
-                        <input type="number" id="dbPrice" placeholder="Price (per unit/kg)" class="w-full px-4 py-2 rounded-xl bg-slate-50 border-none text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input type="number" id="dbPrice" placeholder="Price" class="w-full px-4 py-2 rounded-xl bg-slate-50 border-none text-sm focus:ring-2 focus:ring-indigo-500">
                         <button onclick="addToDB()" class="w-full bg-slate-800 text-white py-2 rounded-xl text-sm font-bold hover:bg-slate-700 transition">Save Product</button>
                     </div>
                     <div id="dbContainer" class="space-y-2 max-h-40 overflow-y-auto custom-scroll pr-2"></div>
@@ -73,8 +72,7 @@
                                     <th class="px-8 py-4"></th>
                                 </tr>
                             </thead>
-                            <tbody id="billBody" class="divide-y divide-slate-50">
-                                </tbody>
+                            <tbody id="billBody" class="divide-y divide-slate-50"></tbody>
                         </table>
                     </div>
 
@@ -93,11 +91,9 @@
     </div>
 
     <script>
-        // --- DATA & STATE ---
         let db = JSON.parse(localStorage.getItem('smartDB')) || { "apple": 12.0, "milk": 2.5, "rice": 4.0 };
         let cart = [];
 
-        // --- SPEECH ENGINE ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
         const synth = window.speechSynthesis;
@@ -107,7 +103,6 @@
             recognition.continuous = false;
             recognition.lang = 'en-US';
 
-            // Start on Hold
             const startRecord = (e) => { e.preventDefault(); try { recognition.start(); } catch(err) {} };
             const stopRecord = () => { recognition.stop(); };
 
@@ -134,76 +129,65 @@
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript.toLowerCase();
                 document.getElementById('instruction').innerHTML = `<span class="text-indigo-400 italic">"heard: ${text}"</span>`;
-                processVoice(text);
+                processVoice(text); // Fixed function call
             };
         }
 
-        // --- CORE LOGIC ---
-        function parseVoice(text) {
-    // 1. Split the sentence into individual item commands (e.g., by "and" or ",")
-    const parts = text.split(/and|,|\+/);
+        function processVoice(text) {
+            const parts = text.split(/and|,|\+/);
+            let addedCount = 0;
 
-    parts.forEach(part => {
-        const cleanPart = part.trim();
-        
-        // 2. Enhanced Regex to capture Qty, Unit, and Item Name
-        // Handles: "2.5kg", "half kg", "500g", "2 units"
-        const regex = /(\d+(?:\/\d+|\.\d+)?|half|quarter)\s*(kg|kilo|gram|g|pkt|pc|unit|bottle)?\s*(\w+)/i;
-        const match = cleanPart.match(regex);
+            parts.forEach(part => {
+                const cleanPart = part.trim();
+                // Regex to find quantity, unit, and name
+                const regex = /(\d+(?:\/\d+|\.\d+)?|half|quarter)?\s*(kg|kilo|gram|g|pkt|pc|unit|bottle)?\s*(\w+)/i;
+                const match = cleanPart.match(regex);
 
-        if (match) {
-            let rawQty = match[1].toLowerCase();
-            let unit = match[2] || 'unit';
-            let itemName = match[3].toLowerCase();
+                if (match) {
+                    let rawQty = match[1] || "1";
+                    let unit = match[2] || 'unit';
+                    let itemName = match[3] ? match[3].toLowerCase() : "";
 
-            // Handle Word-based Quantities
-            let qty = 0;
-            if (rawQty === 'half') qty = 0.5;
-            else if (rawQty === 'quarter') qty = 0.25;
-            else qty = eval(rawQty); // Converts "1/4" to 0.25
+                    let qty = 0;
+                    if (rawQty === 'half') qty = 0.5;
+                    else if (rawQty === 'quarter') qty = 0.25;
+                    else if (rawQty.includes('/')) {
+                        const nums = rawQty.split('/');
+                        qty = parseFloat(nums[0]) / parseFloat(nums[1]);
+                    } else qty = parseFloat(rawQty);
 
-            // Standardize Units for pricing (Price is per KG or per Unit)
-            let calcQty = qty;
-            if (unit === 'gram' || unit === 'g') {
-                calcQty = qty / 1000; 
-                unit = 'g';
-            } else if (unit === 'kilo') {
-                unit = 'kg';
-            }
+                    let calcQty = qty;
+                    if (unit === 'gram' || unit === 'g') {
+                        calcQty = qty / 1000; 
+                        unit = 'g';
+                    } else if (unit === 'kilo' || unit === 'kg') {
+                        unit = 'kg';
+                    }
 
-            // 3. FUZZY FILTER: Find the best match in your Database
-            // This checks if the word you said is contained in a DB key or vice-versa
-            const dbKey = Object.keys(db).find(k => 
-                itemName.includes(k) || k.includes(itemName)
-            );
+                    // Fuzzy matching in DB
+                    const dbKey = Object.keys(db).find(k => itemName.includes(k) || k.includes(itemName));
 
-            if (dbKey) {
-                const price = db[dbKey];
-                const rowTotal = calcQty * price;
-                
-                cart.push({ 
-                    id: Date.now() + Math.random(), 
-                    name: dbKey, 
-                    displayQty: rawQty + (unit !== 'unit' ? unit : ''), 
-                    total: rowTotal, 
-                    unitPrice: price 
-                });
-                
-                updateCartUI();
-                console.log(`Successfully added: ${dbKey}`);
+                    if (dbKey) {
+                        const price = db[dbKey];
+                        const rowTotal = calcQty * price;
+                        cart.push({ 
+                            id: Date.now() + Math.random(), 
+                            name: dbKey, 
+                            displayQty: rawQty + (unit !== 'unit' ? unit : ''), 
+                            total: rowTotal 
+                        });
+                        addedCount++;
+                    }
+                }
+            });
+
+            if (addedCount > 0) {
+                updateUI();
+                speak(`Added items to cart`);
             } else {
-                console.log(`Could not find item: ${itemName}`);
+                speak(`I couldn't find those products`);
             }
         }
-    });
-
-    // 4. Voice Confirmation
-    if (cart.length > 0) {
-        speak("Items processed and added to cart.");
-    } else {
-        speak("I couldn't identify those items. Please try again.");
-    }
-}
 
         function updateUI() {
             const body = document.getElementById('billBody');
@@ -235,11 +219,10 @@
             updateUI();
         }
 
-        // --- DATABASE LOGIC ---
         function addToDB() {
             const n = document.getElementById('dbName').value.toLowerCase().trim();
             const p = parseFloat(document.getElementById('dbPrice').value);
-            if (n && p) {
+            if (n && !isNaN(p)) {
                 db[n] = p;
                 localStorage.setItem('smartDB', JSON.stringify(db));
                 renderDB();
@@ -270,7 +253,6 @@
         document.getElementById('dateDisplay').innerText = new Date().toDateString();
         renderDB();
         updateUI();
-
     </script>
 </body>
 </html>
