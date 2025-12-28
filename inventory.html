@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory - AI POS Pro</title>
+    <title>Master Inventory - AI POS Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,93 +11,68 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
     </style>
 </head>
-<body class="min-h-screen">
-
+<body>
     <nav class="bg-slate-900 text-white p-5 flex justify-between items-center shadow-xl sticky top-0 z-50">
         <div class="flex items-center gap-3 font-black italic text-xl">
             <i class="fa-solid fa-boxes-stacked text-indigo-500 text-2xl"></i> AI-POS <span class="text-indigo-500">PRO</span>
         </div>
-        <div class="flex gap-8 text-xs font-bold uppercase tracking-widest">
+        <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest">
             <a href="dashboard.html" class="opacity-60 hover:opacity-100 transition">Dashboard</a>
-            <a href="billing.html" class="opacity-60 hover:opacity-100 transition">Billing (POS)</a>
+            <a href="billing.html" class="opacity-60 hover:opacity-100 transition">Billing</a>
             <a href="inventory.html" class="text-indigo-400">Inventory</a>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
         <div class="lg:col-span-4">
             <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 sticky top-28">
-                <h2 id="formTitle" class="text-xl font-black text-slate-800 mb-6">Add New Product</h2>
+                <h2 id="formTitle" class="text-xl font-black text-slate-800 mb-6">Product Setup</h2>
                 <div class="space-y-4">
                     <input type="hidden" id="editId">
+                    <input type="text" id="pName" placeholder="Product Name" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500">
                     
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Product Name</label>
-                        <input type="text" id="pName" placeholder="e.g. Fresh Apple" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 mt-1">
-                    </div>
-
-                    <div class="flex gap-4">
-                        <div class="w-1/2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Price</label>
-                            <input type="number" id="pPrice" placeholder="0.00" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 mt-1">
-                        </div>
-                        <div class="w-1/2">
-                            <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Unit</label>
-                            <select id="pUnit" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 mt-1">
-                                <option value="kg">KG</option>
-                                <option value="nos">Nos (Each)</option>
-                                <option value="pack">Pack</option>
-                                <option value="bottle">Bottle</option>
-                                <option value="bottle">Litter</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Category</label>
-                        <select id="pCat" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 mt-1">
-                            <option>Fruits</option><option>Vegetables</option><option>Dairy</option>
-                            <option>Meat</option><option>Fish</option><option>Grains</option><option>Other</option>
+                    <div class="flex gap-2">
+                        <input type="number" id="pPrice" placeholder="Price" class="w-1/2 px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="pUnit" class="w-1/2 px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="PCS">Pieces (PCS)</option><option value="NOS">Numbers (NOS)</option>
+                            <option value="KG">Kilograms (KG)</option><option value="GM">Grams (GM)</option>
+                            <option value="LTR">Liters (LTR)</option><option value="ML">Milliliters (ML)</option>
+                            <option value="MTR">Meters (MTR)</option><option value="FT">Feet (FT)</option>
+                            <option value="SQFT">Square Feet</option>
                         </select>
                     </div>
 
-                    <div>
-                        <label class="text-[10px] font-black uppercase text-slate-400 ml-1">Custom Image URL (Optional)</label>
-                        <input type="text" id="pImg" placeholder="https://..." class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500 mt-1 text-sm">
+                    <select id="pCat" class="w-full px-5 py-3 rounded-xl bg-slate-50 border-none focus:ring-2 focus:ring-indigo-500">
+                        <option>Groceries</option><option>Hardware</option><option>Dairy</option><option>Textiles</option><option>Other</option>
+                    </select>
+
+                    <div class="flex items-center gap-3 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                        <input type="checkbox" id="askQty" class="w-5 h-5 rounded text-indigo-600">
+                        <label for="askQty" class="text-xs font-bold text-indigo-900 leading-tight">Prompt for exact measurement during billing</label>
                     </div>
 
-                    <button onclick="saveProduct()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition mt-4">
-                        Save to Inventory
-                    </button>
-                    <button onclick="resetForm()" class="w-full text-[10px] font-black uppercase text-slate-400 tracking-widest mt-2 hover:text-slate-600">Clear Form</button>
+                    <button onclick="saveProduct()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg">Save Product</button>
+                    <button onclick="resetForm()" class="w-full text-[10px] font-black uppercase text-slate-400 text-center block">Clear</button>
                 </div>
             </div>
         </div>
 
         <div class="lg:col-span-8">
-            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-                <div class="p-8 border-b border-slate-50 flex justify-between items-center">
-                    <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight">Stock Management</h2>
-                    <input type="text" onkeyup="searchTable(this.value)" placeholder="Search products..." class="px-4 py-2 rounded-xl bg-slate-50 border-none text-xs focus:ring-2 focus:ring-indigo-500 w-48">
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-50/50">
-                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
-                                <th class="px-8 py-4">Item Details</th>
-                                <th class="px-8 py-4 text-center">Unit</th>
-                                <th class="px-8 py-4">Price</th>
-                                <th class="px-8 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryList" class="divide-y divide-slate-50">
-                            </tbody>
-                    </table>
-                </div>
+            <div class="bg-white rounded-[2.5rem] shadow-sm overflow-hidden border border-slate-100">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <tr>
+                            <th class="px-8 py-4">Item</th>
+                            <th class="px-8 py-4">Unit</th>
+                            <th class="px-8 py-4">Price</th>
+                            <th class="px-8 py-4">Prompt?</th>
+                            <th class="px-8 py-4"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryList" class="divide-y divide-slate-50"></tbody>
+                </table>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -105,86 +80,59 @@
 
         function saveProduct() {
             const id = document.getElementById('editId').value;
-            const name = document.getElementById('pName').value.trim();
-            const price = parseFloat(document.getElementById('pPrice').value);
-            const unit = document.getElementById('pUnit').value;
-            const cat = document.getElementById('pCat').value;
-            const img = document.getElementById('pImg').value;
-
-            if(!name || isNaN(price)) {
-                alert("Please enter a valid Name and Price");
-                return;
-            }
+            const item = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('pName').value,
+                price: parseFloat(document.getElementById('pPrice').value),
+                unit: document.getElementById('pUnit').value,
+                cat: document.getElementById('pCat').value,
+                askQty: document.getElementById('askQty').checked
+            };
 
             if(id) {
                 const idx = inventory.findIndex(p => p.id == id);
-                inventory[idx] = { id: parseInt(id), name, price, unit, cat, img };
+                inventory[idx] = item;
             } else {
-                inventory.push({ id: Date.now(), name, price, unit, cat, img });
+                inventory.push(item);
             }
 
             localStorage.setItem('AI_POS_INVENTORY', JSON.stringify(inventory));
-            renderTable();
-            resetForm();
+            renderTable(); resetForm();
         }
 
-        function renderTable(filter = "") {
+        function renderTable() {
             const list = document.getElementById('inventoryList');
-            const displayData = filter ? inventory.filter(p => p.name.toLowerCase().includes(filter.toLowerCase())) : inventory;
-            
-            list.innerHTML = displayData.map(p => `
-                <tr class="hover:bg-slate-50 transition group">
-                    <td class="px-8 py-6">
-                        <div class="flex items-center gap-4">
-                            <img src="${p.img || 'https://source.unsplash.com/featured/?'+p.name}" class="w-12 h-12 rounded-xl object-cover shadow-sm">
-                            <div>
-                                <p class="font-bold text-slate-800 capitalize">${p.name}</p>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase">${p.cat}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-8 py-6 text-center">
-                        <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase">${p.unit}</span>
-                    </td>
-                    <td class="px-8 py-6 font-black text-indigo-600">$${p.price.toFixed(2)}</td>
-                    <td class="px-8 py-6 text-right">
-                        <button onclick="editProduct(${p.id})" class="text-indigo-400 hover:text-indigo-600 mx-2 transition"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteProduct(${p.id})" class="text-red-300 hover:text-red-500 mx-2 transition"><i class="fa-solid fa-trash"></i></button>
+            list.innerHTML = inventory.map(p => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-8 py-5 font-bold text-slate-700 capitalize">${p.name}</td>
+                    <td class="px-8 py-5"><span class="text-[10px] bg-slate-100 px-2 py-1 rounded font-black">${p.unit}</span></td>
+                    <td class="px-8 py-5 font-black text-indigo-600">$${p.price.toFixed(2)}</td>
+                    <td class="px-8 py-5 text-xs font-bold ${p.askQty ? 'text-amber-500':'text-slate-300'}">${p.askQty ? 'YES':'NO'}</td>
+                    <td class="px-8 py-5 text-right">
+                        <button onclick="editProduct(${p.id})" class="text-indigo-400 mx-2"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="text-red-300"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
         }
 
         function editProduct(id) {
-            const p = inventory.find(item => item.id == id);
+            const p = inventory.find(i => i.id == id);
             document.getElementById('editId').value = p.id;
             document.getElementById('pName').value = p.name;
             document.getElementById('pPrice').value = p.price;
             document.getElementById('pUnit').value = p.unit;
             document.getElementById('pCat').value = p.cat;
-            document.getElementById('pImg').value = p.img;
-            document.getElementById('formTitle').innerText = "Edit Product";
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('askQty').checked = p.askQty;
         }
 
         function deleteProduct(id) {
-            if(confirm("Are you sure you want to remove this item?")) {
-                inventory = inventory.filter(p => p.id != id);
-                localStorage.setItem('AI_POS_INVENTORY', JSON.stringify(inventory));
-                renderTable();
-            }
+            inventory = inventory.filter(p => p.id != id);
+            localStorage.setItem('AI_POS_INVENTORY', JSON.stringify(inventory));
+            renderTable();
         }
 
-        function searchTable(val) { renderTable(val); }
-
-        function resetForm() {
-            document.getElementById('editId').value = "";
-            document.getElementById('pName').value = "";
-            document.getElementById('pPrice').value = "";
-            document.getElementById('pImg').value = "";
-            document.getElementById('formTitle').innerText = "Add New Product";
-        }
-
+        function resetForm() { document.getElementById('editId').value = ""; document.getElementById('pName').value = ""; document.getElementById('pPrice').value = ""; }
         renderTable();
     </script>
 </body>
